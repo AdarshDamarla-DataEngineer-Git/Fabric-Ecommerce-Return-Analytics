@@ -1,3 +1,0 @@
-.gitattributes -text diff
-*.sql -text diff
-*.sqlproj -text diff
