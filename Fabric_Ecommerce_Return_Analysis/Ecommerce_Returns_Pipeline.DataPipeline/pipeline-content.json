@@ -411,7 +411,7 @@
         "typeProperties": {
           "variableName": "error_message",
           "value": {
-            "value": "@concat(\n    'Copy_Github_Bronze Failed: ',\n    activity('Copy_Github_Bronze').error.message\n    )",
+            "value": "@if(\n    equals(activity('Copy_Github_Bronze').Status, 'Failed'),\n    concat('Copy_Github_Bronze Failed: ', activity('Copy_Github_Bronze').error.message),\n    if(\n        equals(activity('Bronze_Silver_Notebook').Status, 'Failed'),\n        concat('Bronze_Silver_Notebook Failed: ', activity('Bronze_Silver_Notebook').error.message),\n        if(\n            equals(activity('Silver_Gold_Stg_Notebook').Status, 'Failed'),\n            concat('Silver_Gold_Stg_Notebook Failed: ', activity('Silver_Gold_Stg_Notebook').error.message),\n            if(\n                equals(activity('Stored_Procedure_Stg_FinalGold').Status, 'Failed'),\n                concat('Stored_Procedure_Stg_FinalGold Failed: ', activity('Stored_Procedure_Stg_FinalGold').error.message),\n                if(\n                    equals(activity('Stored_Procedure_Update_Watermark').Status, 'Failed'),\n                    concat('Stored_Procedure_Update_Watermark Failed: ', activity('Stored_Procedure_Update_Watermark').error.message),\n                    null\n                )\n            )\n        )\n    )\n)",
             "type": "Expression"
           }
         },
@@ -419,104 +419,41 @@
           "secureInput": false,
           "secureOutput": false
         },
-        "name": "Set_Error_Copy_Github_Bronze",
+        "name": "Set_Error",
         "dependsOn": [
           {
             "activity": "Copy_Github_Bronze",
             "dependencyConditions": [
-              "Failed"
+              "Failed",
+              "Skipped"
             ]
-          }
-        ]
-      },
-      {
-        "type": "SetVariable",
-        "typeProperties": {
-          "variableName": "error_message",
-          "value": {
-            "value": "@concat(\n    'Bronze_Silver_Notebook Failed: ',\n    activity('Bronze_Silver_Notebook').error.message\n    )",
-            "type": "Expression"
-          }
-        },
-        "policy": {
-          "secureInput": false,
-          "secureOutput": false
-        },
-        "name": "Set_Error_Bronze_Silver_Notebook",
-        "dependsOn": [
-          {
-            "activity": "Bronze_Silver_Notebook",
-            "dependencyConditions": [
-              "Failed"
-            ]
-          }
-        ]
-      },
-      {
-        "type": "SetVariable",
-        "typeProperties": {
-          "variableName": "error_message",
-          "value": {
-            "value": "@concat(\n    'Silver_Gold_Stg_Notebook Failed: ',\n    activity('Silver_Gold_Stg_Notebook').error.message\n    )",
-            "type": "Expression"
-          }
-        },
-        "policy": {
-          "secureInput": false,
-          "secureOutput": false
-        },
-        "name": "Set_Error_Silver_Gold_Stg_Notebook",
-        "dependsOn": [
-          {
-            "activity": "Silver_Gold_Stg_Notebook",
-            "dependencyConditions": [
-              "Failed"
-            ]
-          }
-        ]
-      },
-      {
-        "type": "SetVariable",
-        "typeProperties": {
-          "variableName": "error_message",
-          "value": {
-            "value": "@concat(\n    'Stored_Procedure_Stg_FinalGold Failed: ',\n    activity('Stored_Procedure_Stg_FinalGold').error.message\n    )",
-            "type": "Expression"
-          }
-        },
-        "policy": {
-          "secureInput": false,
-          "secureOutput": false
-        },
-        "name": "Set_Error_Stored_Procedure_Stg_FinalGold",
-        "dependsOn": [
-          {
-            "activity": "Stored_Procedure_Stg_FinalGold",
-            "dependencyConditions": [
-              "Failed"
-            ]
-          }
-        ]
-      },
-      {
-        "type": "SetVariable",
-        "typeProperties": {
-          "variableName": "error_message",
-          "value": {
-            "value": "@concat(\n    'Stored_Procedure_Update_Watermark Failed: ',\n    activity('Stored_Procedure_Update_Watermark').error.message\n    )",
-            "type": "Expression"
-          }
-        },
-        "policy": {
-          "secureInput": false,
-          "secureOutput": false
-        },
-        "name": "Set_Error_Stored_Procedure_Update_Watermark",
-        "dependsOn": [
+          },
           {
             "activity": "Stored_Procedure_Update_Watermark",
             "dependencyConditions": [
-              "Failed"
+              "Failed",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Silver_Gold_Stg_Notebook",
+            "dependencyConditions": [
+              "Failed",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Bronze_Silver_Notebook",
+            "dependencyConditions": [
+              "Failed",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Stored_Procedure_Stg_FinalGold",
+            "dependencyConditions": [
+              "Failed",
+              "Skipped"
             ]
           }
         ]
@@ -641,35 +578,7 @@
         "name": "Stored_Procedure_Insert_Metadata",
         "dependsOn": [
           {
-            "activity": "Set_Error_Copy_Github_Bronze",
-            "dependencyConditions": [
-              "Succeeded",
-              "Skipped"
-            ]
-          },
-          {
-            "activity": "Set_Error_Bronze_Silver_Notebook",
-            "dependencyConditions": [
-              "Succeeded",
-              "Skipped"
-            ]
-          },
-          {
-            "activity": "Set_Error_Silver_Gold_Stg_Notebook",
-            "dependencyConditions": [
-              "Succeeded",
-              "Skipped"
-            ]
-          },
-          {
-            "activity": "Set_Error_Stored_Procedure_Stg_FinalGold",
-            "dependencyConditions": [
-              "Succeeded",
-              "Skipped"
-            ]
-          },
-          {
-            "activity": "Set_Error_Stored_Procedure_Update_Watermark",
+            "activity": "Set_Error",
             "dependencyConditions": [
               "Succeeded",
               "Skipped"

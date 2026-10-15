@@ -1,0 +1,83 @@
+name: Fabric CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: Type DEPLOY to request the protected production deployment
+        required: true
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fabric-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-dev-to-main:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require dev to main promotion
+        env:
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BASE_BRANCH: ${{ github.base_ref }}
+        run: |
+          if [[ "$HEAD_BRANCH" != "dev" || "$BASE_BRANCH" != "main" ]]; then
+            echo "This promotion workflow only accepts pull requests from dev to main."
+            exit 1
+          fi
+
+      - name: Check out the proposed merge
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Fabric source files
+        run: python .github/scripts/validate_fabric_repo.py Fabric_Ecommerce_Return_Analysis
+
+  deploy-production:
+    if: github.event_name == 'workflow_dispatch' && inputs.confirm_production == 'DEPLOY' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out approved main
+        uses: actions/checkout@v4
+
+      - name: Sign in to Azure with GitHub OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install pinned deployment dependencies
+        run: python -m pip install --requirement .github/scripts/requirements-deploy.txt
+
+      - name: Validate Fabric source files again
+        run: python .github/scripts/validate_fabric_repo.py Fabric_Ecommerce_Return_Analysis
+
+      - name: Publish to the separate production workspace
+        env:
+          PROD_WORKSPACE_ID: ${{ vars.PROD_WORKSPACE_ID }}
+          PROD_SOURCE_CONNECTION_ID: ${{ secrets.PROD_SOURCE_CONNECTION_ID }}
+          PROD_WAREHOUSE_ENDPOINT: ${{ vars.PROD_WAREHOUSE_ENDPOINT }}
+        run: python .github/scripts/deploy_fabric.py
+

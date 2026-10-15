@@ -1,0 +1,25 @@
+find_replace:
+  # Rebind item references to items created or found in the target workspace.
+  - find_value: "6ffcaca5-530c-a016-41b5-35d7c6e9196c"
+    replace_value:
+      PROD: "$items.Lakehouse.Ecommerce_Returns_Lakehouse.$id"
+  - find_value: "bc3305e3-0c9a-a3b8-4884-b22af9f2dae4"
+    replace_value:
+      PROD: "$items.Warehouse.Ecommerce_Returns_Warehouse.$id"
+  - find_value: "dd6bf2eb-83e7-924a-4b91-da8a71782551"
+    replace_value:
+      PROD: "$items.Notebook.Bronze_Silver_Notebook.$id"
+  - find_value: "9159830b-9b3f-8bd6-47e5-671879d06d39"
+    replace_value:
+      PROD: "$items.Notebook.Silver_Gold_Notebook.$id"
+  - find_value: "00000000-0000-0000-0000-000000000000"
+    replace_value:
+      PROD: "$workspace.$id"
+  - find_value: "828ca480-983e-4674-a418-5c9210831c5a"
+    replace_value:
+      PROD: "$ENV:PROD_SOURCE_CONNECTION_ID"
+    item_type: "DataPipeline"
+  - find_value: "msufzoqqqpjenhwlqiapdqlv4a-rfjegbvt2fcunnqaavyfmzgzbm.datawarehouse.fabric.microsoft.com"
+    replace_value:
+      PROD: "$ENV:PROD_WAREHOUSE_ENDPOINT"
+    item_type: "DataPipeline"
