@@ -1,0 +1,850 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "formatSettings": {
+              "type": "DelimitedTextReadSettings"
+            },
+            "storeSettings": {
+              "type": "HttpReadSettings",
+              "requestMethod": "GET"
+            },
+            "datasetSettings": {
+              "type": "DelimitedText",
+              "typeProperties": {
+                "location": {
+                  "type": "HttpServerLocation",
+                  "relativeUrl": {
+                    "value": "@concat(\n    'Fabric-Ecommerce-Return-Analytics/refs/heads/main/Data/Ecommerce_Returns_Refunds_',\n    variables('watermark_year'),\n    '_',\n    variables('watermark_month'),\n    '_',\n    variables('watermark_month_name'),\n    '.csv')",
+                    "type": "Expression"
+                  }
+                },
+                "columnDelimiter": ",",
+                "quoteChar": "\"",
+                "escapeChar": "\\",
+                "firstRowAsHeader": true
+              },
+              "schema": [],
+              "externalReferences": {
+                "connection": "828ca480-983e-4674-a418-5c9210831c5a"
+              },
+              "annotations": []
+            }
+          },
+          "sink": {
+            "type": "ParquetSink",
+            "formatSettings": {
+              "type": "ParquetWriteSettings",
+              "enableVertiParquet": true
+            },
+            "storeSettings": {
+              "type": "AzureBlobStorageWriteSettings",
+              "copyBehavior": "FlattenHierarchy"
+            },
+            "datasetSettings": {
+              "type": "Parquet",
+              "typeProperties": {
+                "location": {
+                  "type": "LakehouseLocation",
+                  "folderPath": {
+                    "value": "@concat(\n    'bronze/ecommerce_returns/year=',\n    variables('watermark_year'),\n    '/month=',\n    variables('watermark_month'),\n    '/'\n)",
+                    "type": "Expression"
+                  }
+                },
+                "compressionCodec": "snappy"
+              },
+              "schema": [],
+              "linkedService": {
+                "name": "Ecommerce_Returns_Lakehouse",
+                "properties": {
+                  "type": "Lakehouse",
+                  "typeProperties": {
+                    "artifactId": "6ffcaca5-530c-a016-41b5-35d7c6e9196c",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "rootFolder": "Files"
+                  },
+                  "annotations": []
+                }
+              },
+              "annotations": []
+            }
+          },
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          },
+          "enableStaging": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Copy_Github_Bronze",
+        "dependsOn": [
+          {
+            "activity": "Set_watermark_month_name",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "dd6bf2eb-83e7-924a-4b91-da8a71782551",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "p_year": {
+              "value": {
+                "value": "@variables('watermark_year')",
+                "type": "Expression"
+              },
+              "type": "string"
+            },
+            "p_month": {
+              "value": {
+                "value": "@variables('watermark_month')",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Bronze_Silver_Notebook",
+        "dependsOn": [
+          {
+            "activity": "Set_bronze_record_processed",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "TridentNotebook",
+        "typeProperties": {
+          "notebookId": "9159830b-9b3f-8bd6-47e5-671879d06d39",
+          "workspaceId": "00000000-0000-0000-0000-000000000000",
+          "parameters": {
+            "p_year": {
+              "value": {
+                "value": "@variables('watermark_year')",
+                "type": "Expression"
+              },
+              "type": "string"
+            },
+            "p_month": {
+              "value": {
+                "value": "@variables('watermark_month')",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Silver_Gold_Stg_Notebook",
+        "dependsOn": [
+          {
+            "activity": "Wait",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SqlServerStoredProcedure",
+        "typeProperties": {
+          "storedProcedureName": "[Returns_Staging].[Merge_Returns_Gold_Final]"
+        },
+        "linkedService": {
+          "name": "Ecommerce_Returns_Warehouse",
+          "properties": {
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "artifactId": "bc3305e3-0c9a-a3b8-4884-b22af9f2dae4",
+              "endpoint": "msufzoqqqpjenhwlqiapdqlv4a-rfjegbvt2fcunnqaavyfmzgzbm.datawarehouse.fabric.microsoft.com",
+              "workspaceId": "00000000-0000-0000-0000-000000000000"
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Stored_Procedure_Stg_FinalGold",
+        "dependsOn": [
+          {
+            "activity": "Set_gold_fact_Stg_record_processed",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Wait",
+        "typeProperties": {
+          "waitTimeInSeconds": 30
+        },
+        "name": "Wait",
+        "dependsOn": [
+          {
+            "activity": "Set_silver_record_processed",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Lookup",
+        "typeProperties": {
+          "source": {
+            "type": "DataWarehouseSource",
+            "sqlReaderQuery": {
+              "value": "@concat(\n    'SELECT\n        Last_Processed_Year,\n        Last_Processed_Month\n    FROM \n        Returns_Control.Pipeline_Watermark\n    WHERE \n        Pipeline_Name =''', pipeline().PipelineName,'''\n    ORDER BY \n        Last_Processed_Year DESC,\n        Last_Processed_Month DESC;')",
+              "type": "Expression"
+            },
+            "partitionOption": "None",
+            "queryTimeout": "02:00:00"
+          },
+          "datasetSettings": {
+            "type": "DataWarehouseTable",
+            "schema": [],
+            "linkedService": {
+              "name": "Ecommerce_Returns_Warehouse",
+              "properties": {
+                "type": "DataWarehouse",
+                "typeProperties": {
+                  "artifactId": "bc3305e3-0c9a-a3b8-4884-b22af9f2dae4",
+                  "endpoint": "msufzoqqqpjenhwlqiapdqlv4a-rfjegbvt2fcunnqaavyfmzgzbm.datawarehouse.fabric.microsoft.com",
+                  "workspaceId": "00000000-0000-0000-0000-000000000000"
+                },
+                "annotations": []
+              }
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Lookup_Watermark",
+        "dependsOn": []
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "watermark_year",
+          "value": {
+            "value": "@if(\n    equals(\n        int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n        12\n    ),\n    string(\n        add(\n            int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Year),\n            1\n        )\n    ),\n    string(\n        activity('Lookup_Watermark').output.firstRow.Last_Processed_Year\n    )\n)",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_watermark_year",
+        "dependsOn": [
+          {
+            "activity": "Lookup_Watermark",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "watermark_month",
+          "value": {
+            "value": "@if(\n    equals(\n        int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n        12\n    ),\n    '01',\n    if(\n        less(\n            add(\n                int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                1\n            ),\n            10\n        ),\n        concat(\n            '0',\n            string(\n                add(\n                    int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                    1\n                )\n            )\n        ),\n        string(\n            add(\n                int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                1\n            )\n        )\n    )\n)",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_watermark_month",
+        "dependsOn": [
+          {
+            "activity": "Lookup_Watermark",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "watermark_month_name",
+          "value": {
+            "value": "@formatDateTime(\n    concat(\n        variables('watermark_year'),\n        '-',\n        variables('watermark_month'),\n        '-01'\n    ),\n    'MMMM'\n)",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_watermark_month_name",
+        "dependsOn": [
+          {
+            "activity": "Set_watermark_year",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          },
+          {
+            "activity": "Set_watermark_month",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SqlServerStoredProcedure",
+        "typeProperties": {
+          "storedProcedureName": "[Returns_Control].[Update_Watermark]",
+          "storedProcedureParameters": {
+            "Pipeline_Name": {
+              "value": {
+                "value": "@pipeline().PipelineName",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Pipeline_Run_ID": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Process_Month": {
+              "value": {
+                "value": "@int(variables('watermark_month'))",
+                "type": "Expression"
+              },
+              "type": "Int32"
+            },
+            "Process_Year": {
+              "value": {
+                "value": "@int(variables('watermark_year'))",
+                "type": "Expression"
+              },
+              "type": "Int32"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "Ecommerce_Returns_Warehouse",
+          "properties": {
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "artifactId": "bc3305e3-0c9a-a3b8-4884-b22af9f2dae4",
+              "endpoint": "msufzoqqqpjenhwlqiapdqlv4a-rfjegbvt2fcunnqaavyfmzgzbm.datawarehouse.fabric.microsoft.com",
+              "workspaceId": "00000000-0000-0000-0000-000000000000"
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Stored_Procedure_Update_Watermark",
+        "dependsOn": [
+          {
+            "activity": "Set_gold_fact_final_record_count",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Copy_Github_Bronze Failed: ',\n    activity('Copy_Github_Bronze').error.message\n    )",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Copy_Github_Bronze",
+        "dependsOn": [
+          {
+            "activity": "Copy_Github_Bronze",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Bronze_Silver_Notebook Failed: ',\n    activity('Bronze_Silver_Notebook').error.message\n    )",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Bronze_Silver_Notebook",
+        "dependsOn": [
+          {
+            "activity": "Bronze_Silver_Notebook",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Silver_Gold_Stg_Notebook Failed: ',\n    activity('Silver_Gold_Stg_Notebook').error.message\n    )",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Silver_Gold_Stg_Notebook",
+        "dependsOn": [
+          {
+            "activity": "Silver_Gold_Stg_Notebook",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Stored_Procedure_Stg_FinalGold Failed: ',\n    activity('Stored_Procedure_Stg_FinalGold').error.message\n    )",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Stored_Procedure_Stg_FinalGold",
+        "dependsOn": [
+          {
+            "activity": "Stored_Procedure_Stg_FinalGold",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Stored_Procedure_Update_Watermark Failed: ',\n    activity('Stored_Procedure_Update_Watermark').error.message\n    )",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Stored_Procedure_Update_Watermark",
+        "dependsOn": [
+          {
+            "activity": "Stored_Procedure_Update_Watermark",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SqlServerStoredProcedure",
+        "typeProperties": {
+          "storedProcedureName": "[Returns_Control].[Insert_Pipeline_Metadata]",
+          "storedProcedureParameters": {
+            "Bronze_Record_Processed": {
+              "value": {
+                "value": "@variables('bronze_record_processed')",
+                "type": "Expression"
+              },
+              "type": "Int64"
+            },
+            "Error_Message": {
+              "value": {
+                "value": "@variables('error_message')",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Gold_Fact_Final_Record_Count": {
+              "value": {
+                "value": "@variables('gold_fact_final_record_count')",
+                "type": "Expression"
+              },
+              "type": "Int64"
+            },
+            "Gold_Fact_Stg_Record_Processed": {
+              "value": {
+                "value": "@variables('gold_fact_Stg_record_processed')",
+                "type": "Expression"
+              },
+              "type": "Int64"
+            },
+            "Pipeline_Name": {
+              "value": {
+                "value": "@pipeline().PipelineName",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Pipeline_Run_ID": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Pipeline_Trigger_Type": {
+              "value": {
+                "value": "@pipeline().TriggerType",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Process_Month": {
+              "value": {
+                "value": "@int(variables('watermark_month'))",
+                "type": "Expression"
+              },
+              "type": "Int32"
+            },
+            "Process_Month_Name": {
+              "value": {
+                "value": "@variables('watermark_month_name')",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Process_Year": {
+              "value": {
+                "value": "@int(variables('watermark_year'))",
+                "type": "Expression"
+              },
+              "type": "Int32"
+            },
+            "Silver_Record_Processed": {
+              "value": {
+                "value": "@variables('silver_record_processed')",
+                "type": "Expression"
+              },
+              "type": "Int64"
+            },
+            "Source_File_Name": {
+              "value": {
+                "value": "@concat(\n    'Ecommerce_Returns_Refunds_',\n    variables('watermark_year'),\n    '_',\n    variables('watermark_month'),\n    '_',\n    variables('watermark_month_name'),\n    '.csv')",
+                "type": "Expression"
+              },
+              "type": "String"
+            },
+            "Start_Time": {
+              "value": {
+                "value": "@pipeline().TriggerTime",
+                "type": "Expression"
+              },
+              "type": "DateTime"
+            }
+          }
+        },
+        "linkedService": {
+          "name": "Ecommerce_Returns_Warehouse",
+          "properties": {
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "artifactId": "bc3305e3-0c9a-a3b8-4884-b22af9f2dae4",
+              "endpoint": "msufzoqqqpjenhwlqiapdqlv4a-rfjegbvt2fcunnqaavyfmzgzbm.datawarehouse.fabric.microsoft.com",
+              "workspaceId": "00000000-0000-0000-0000-000000000000"
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Stored_Procedure_Insert_Metadata",
+        "dependsOn": [
+          {
+            "activity": "Set_Error_Copy_Github_Bronze",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Set_Error_Bronze_Silver_Notebook",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Set_Error_Silver_Gold_Stg_Notebook",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Set_Error_Stored_Procedure_Stg_FinalGold",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Set_Error_Stored_Procedure_Update_Watermark",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Stored_Procedure_Update_Watermark",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Script",
+        "typeProperties": {
+          "scripts": [
+            {
+              "text": {
+                "value": "SELECT COUNT(*) AS Gold_Fact_Record_Count  FROM Returns_Gold.Fact_Orders;",
+                "type": "Expression"
+              },
+              "type": "Query"
+            }
+          ],
+          "scriptBlockExecutionTimeout": "02:00:00"
+        },
+        "linkedService": {
+          "name": "Ecommerce_Returns_Warehouse",
+          "properties": {
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "artifactId": "bc3305e3-0c9a-a3b8-4884-b22af9f2dae4",
+              "endpoint": "msufzoqqqpjenhwlqiapdqlv4a-rfjegbvt2fcunnqaavyfmzgzbm.datawarehouse.fabric.microsoft.com",
+              "workspaceId": "00000000-0000-0000-0000-000000000000"
+            },
+            "annotations": []
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Script_Count_Gold_Fact_Table",
+        "dependsOn": [
+          {
+            "activity": "Stored_Procedure_Stg_FinalGold",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "gold_fact_Stg_record_processed",
+          "value": {
+            "value": "@int(activity('Silver_Gold_Stg_Notebook').output.result.exitValue)",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_gold_fact_Stg_record_processed",
+        "dependsOn": [
+          {
+            "activity": "Silver_Gold_Stg_Notebook",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "gold_fact_final_record_count",
+          "value": {
+            "value": "@activity('Script_Count_Gold_Fact_Table').output.resultSets[0].rows[0].Gold_Fact_Record_Count",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_gold_fact_final_record_count",
+        "dependsOn": [
+          {
+            "activity": "Script_Count_Gold_Fact_Table",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "silver_record_processed",
+          "value": {
+            "value": "@int(activity('Bronze_Silver_Notebook').output.result.exitValue)",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_silver_record_processed",
+        "dependsOn": [
+          {
+            "activity": "Bronze_Silver_Notebook",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "bronze_record_processed",
+          "value": {
+            "value": "@int(activity('Copy_Github_Bronze').output.rowsCopied)",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_bronze_record_processed",
+        "dependsOn": [
+          {
+            "activity": "Copy_Github_Bronze",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      }
+    ],
+    "variables": {
+      "watermark_year": {
+        "type": "String"
+      },
+      "watermark_month": {
+        "type": "String"
+      },
+      "watermark_month_name": {
+        "type": "String"
+      },
+      "error_message": {
+        "type": "String"
+      },
+      "bronze_record_processed": {
+        "type": "Integer"
+      },
+      "silver_record_processed": {
+        "type": "Integer"
+      },
+      "gold_fact_Stg_record_processed": {
+        "type": "Integer"
+      },
+      "gold_fact_final_record_count": {
+        "type": "Integer"
+      }
+    }
+  }
+}
