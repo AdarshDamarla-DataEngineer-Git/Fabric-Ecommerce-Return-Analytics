@@ -570,7 +570,7 @@
             },
             "Process_Month": {
               "value": {
-                "value": "@int(variables('watermark_month'))",
+                "value": "@if(empty(variables('watermark_month')), 0, int(variables('watermark_month')))",
                 "type": "Expression"
               },
               "type": "Int32"
@@ -584,7 +584,7 @@
             },
             "Process_Year": {
               "value": {
-                "value": "@int(variables('watermark_year'))",
+                "value": "@if(empty(variables('watermark_year')), 0, int(variables('watermark_year')))",
                 "type": "Expression"
               },
               "type": "Int32"
@@ -670,6 +670,13 @@
           },
           {
             "activity": "Stored_Procedure_Update_Watermark",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
+          },
+          {
+            "activity": "Set_Error_Lookup_Watermark",
             "dependencyConditions": [
               "Succeeded",
               "Skipped"
@@ -775,6 +782,29 @@
             "activity": "Stored_Procedure_Insert_Metadata",
             "dependencyConditions": [
               "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Lookup_Watermark Failed: ', activity('Lookup_Watermark').error.message\n)",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Lookup_Watermark",
+        "dependsOn": [
+          {
+            "activity": "Lookup_Watermark",
+            "dependencyConditions": [
+              "Failed"
             ]
           }
         ]
