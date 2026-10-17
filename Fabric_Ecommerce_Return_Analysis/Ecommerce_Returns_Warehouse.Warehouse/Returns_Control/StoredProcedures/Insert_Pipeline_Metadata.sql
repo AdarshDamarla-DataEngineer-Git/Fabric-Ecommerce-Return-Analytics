@@ -12,7 +12,6 @@ CREATE   PROCEDURE Returns_Control.Insert_Pipeline_Metadata
     @Bronze_Record_Processed     BIGINT,
     @Silver_Record_Processed    BIGINT,
     @Gold_Fact_Stg_Record_Processed  BIGINT,
-    @Gold_Fact_Final_Record_Count  BIGINT,
 
     @Start_Time              DATETIME2(6),
 
@@ -20,9 +19,12 @@ CREATE   PROCEDURE Returns_Control.Insert_Pipeline_Metadata
 AS
 BEGIN
 
+    SET NOCOUNT ON;
+
     DECLARE @End_Time DATETIME2(6);
     DECLARE @Duration_Seconds BIGINT;
     DECLARE @Load_Status VARCHAR(20);
+    DECLARE @Gold_Fact_Final_Record_Count BIGINT;
 
     SET @End_Time = GETDATE();
 
@@ -36,6 +38,16 @@ BEGIN
             THEN 'Success'
             ELSE 'Failed'
         END;
+
+    SELECT
+        @Gold_Fact_Final_Record_Count = COUNT_BIG(*)
+    FROM Returns_Gold.Fact_Orders;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Returns_Control.Pipeline_Metadata
+        WHERE Pipeline_Run_ID = @Pipeline_Run_ID
+    )
 
     INSERT INTO Returns_Control.Pipeline_Metadata
     (
