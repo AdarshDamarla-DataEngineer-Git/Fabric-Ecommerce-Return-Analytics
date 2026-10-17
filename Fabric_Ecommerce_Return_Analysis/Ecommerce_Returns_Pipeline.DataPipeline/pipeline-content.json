@@ -672,7 +672,8 @@
             "activity": "Stored_Procedure_Update_Watermark",
             "dependencyConditions": [
               "Succeeded",
-              "Skipped"
+              "Skipped",
+              "Failed"
             ]
           },
           {
