@@ -34,8 +34,10 @@ BEGIN
     SET @Load_Status =
         CASE
             WHEN @Error_Message IS NULL
-                 OR LTRIM(RTRIM(@Error_Message)) = ''
+                OR LTRIM(RTRIM(@Error_Message)) = ''
             THEN 'Success'
+            WHEN LTRIM(@Error_Message) LIKE 'Source file not found%'
+            THEN 'No Source File'
             ELSE 'Failed'
         END;
 

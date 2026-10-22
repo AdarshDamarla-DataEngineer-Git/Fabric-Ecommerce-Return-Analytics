@@ -272,7 +272,7 @@
         "typeProperties": {
           "variableName": "watermark_year",
           "value": {
-            "value": "@if(\n    equals(\n        int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n        12\n    ),\n    string(\n        add(\n            int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Year),\n            1\n        )\n    ),\n    string(\n        activity('Lookup_Watermark').output.firstRow.Last_Processed_Year\n    )\n)",
+            "value": "@if(\n    and(\n        not(empty(pipeline().parameters.reprocess_year)),\n        not(empty(pipeline().parameters.reprocess_month))\n    ),\n    pipeline().parameters.reprocess_year,\n    if(\n        equals(\n            int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n            12\n        ),\n        string(\n            add(\n                int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Year),\n                1\n            )\n        ),\n        string(\n            activity('Lookup_Watermark').output.firstRow.Last_Processed_Year\n        )\n    )\n)",
             "type": "Expression"
           }
         },
@@ -295,7 +295,7 @@
         "typeProperties": {
           "variableName": "watermark_month",
           "value": {
-            "value": "@if(\n    equals(\n        int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n        12\n    ),\n    '01',\n    if(\n        less(\n            add(\n                int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                1\n            ),\n            10\n        ),\n        concat(\n            '0',\n            string(\n                add(\n                    int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                    1\n                )\n            )\n        ),\n        string(\n            add(\n                int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                1\n            )\n        )\n    )\n)",
+            "value": "@if(\n    and(\n        not(empty(pipeline().parameters.reprocess_year)),\n        not(empty(pipeline().parameters.reprocess_month))\n    ),\n    if(\n        less(length(pipeline().parameters.reprocess_month), 2),\n        concat('0', pipeline().parameters.reprocess_month),\n        pipeline().parameters.reprocess_month\n    ),\n    if(\n        equals(\n            int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n            12\n        ),\n        '01',\n        if(\n            less(\n                add(\n                    int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                    1\n                ),\n                10\n            ),\n            concat(\n                '0',\n                string(\n                    add(\n                        int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                        1\n                    )\n                )\n            ),\n            string(\n                add(\n                    int(activity('Lookup_Watermark').output.firstRow.Last_Processed_Month),\n                    1\n                )\n            )\n        )\n    )\n)",
             "type": "Expression"
           }
         },
@@ -411,7 +411,7 @@
         "typeProperties": {
           "variableName": "error_message",
           "value": {
-            "value": "@concat(\n    'Copy_Github_Bronze Failed: ',\n    activity('Copy_Github_Bronze').error.message\n    )",
+            "value": "@if(\n    or(contains(string(activity('Copy_Github_Bronze').error.message),'404'),\n        contains(toLower(string(activity('Copy_Github_Bronze').error.message)),'not found')),\n\n        concat('Source file not found for ',variables('watermark_year'),'-',variables('watermark_month'),'. Watermark not advanced.'),\n\n        concat('Copy_Github_Bronze Failed: ',activity('Copy_Github_Bronze').error.message)\n        )",
             "type": "Expression"
           }
         },
@@ -803,6 +803,14 @@
         ]
       }
     ],
+    "parameters": {
+      "reprocess_year": {
+        "type": "string"
+      },
+      "reprocess_month": {
+        "type": "string"
+      }
+    },
     "variables": {
       "watermark_year": {
         "type": "String"
@@ -825,6 +833,7 @@
       "gold_fact_Stg_record_processed": {
         "type": "Integer"
       }
-    }
+    },
+    "concurrency": 1
   }
 }
