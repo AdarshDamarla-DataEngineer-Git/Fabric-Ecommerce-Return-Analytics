@@ -674,6 +674,13 @@
               "Succeeded",
               "Skipped"
             ]
+          },
+          {
+            "activity": "Set_Error_watermark_month_name",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
           }
         ]
       },
@@ -796,6 +803,29 @@
         "dependsOn": [
           {
             "activity": "Lookup_Watermark",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat('Set_watermark_month_name Failed: invalid reprocess input (year=', pipeline().parameters.reprocess_year, ', month=', pipeline().parameters.reprocess_month, ')')",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_watermark_month_name",
+        "dependsOn": [
+          {
+            "activity": "Set_watermark_month_name",
             "dependencyConditions": [
               "Failed"
             ]

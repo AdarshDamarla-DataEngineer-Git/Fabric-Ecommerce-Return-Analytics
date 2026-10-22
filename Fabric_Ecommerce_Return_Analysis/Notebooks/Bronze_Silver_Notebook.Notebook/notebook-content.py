@@ -70,6 +70,21 @@ df = spark.read.parquet(sourceFilePath)
 
 # CELL ********************
 
+if df.limit(1).count() == 0:
+    raise Exception(
+        f"Bronze source is empty for {p_year}-{p_month}. "
+        "Watermark not advanced."
+    )
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
 df.printSchema()
 
 # METADATA ********************
