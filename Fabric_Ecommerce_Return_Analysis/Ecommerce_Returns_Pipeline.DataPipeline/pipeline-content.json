@@ -669,14 +669,6 @@
             ]
           },
           {
-            "activity": "Stored_Procedure_Update_Watermark",
-            "dependencyConditions": [
-              "Succeeded",
-              "Skipped",
-              "Failed"
-            ]
-          },
-          {
             "activity": "Set_Error_Lookup_Watermark",
             "dependencyConditions": [
               "Succeeded",
