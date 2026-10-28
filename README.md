@@ -132,6 +132,9 @@ erDiagram
 .
 ├── README.md
 ├── Warehouse_Setup/                    Numbered T-SQL scripts to build the warehouse objects
+├── apps_script/
+│   └── Code.gs                         Google Apps Script that sends the pipeline emails
+├── LICENSE                             MIT
 ├── docs/
 │   ├── PIPELINE_ARCHITECTURE.md        Activities, layers, watermark logic, repo layout
 │   ├── BUSINESS_RULES.md               Cleaning, validation, quarantine and merge rules
@@ -258,6 +261,10 @@ ORDER BY Start_Time DESC;
 ## Scope and Future Evolution
 
 This project covers ingestion, transformation, modelling, data quality, orchestration, auditing and alerting for a single monthly dataset. The natural next step is a Power BI semantic model and report on top of the Gold schema.
+
+## License
+
+Released under the [MIT License](LICENSE).
 
 ## Author
 

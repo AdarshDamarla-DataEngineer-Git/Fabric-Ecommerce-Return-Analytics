@@ -28,6 +28,7 @@ Pipeline (If_Check_Error)
 - A Google account to send from.
 - Edit access to the pipeline in Fabric.
 - The pipeline already contains the `If_Check_Error` activity. Its **True** branch holds `Fail_Pipeline`, and its **False** branch is empty until you add the success email.
+- `If_Check_Error` should follow `Stored_Procedure_Insert_Metadata` on **Completed** (the blue arrow), so the email is still sent if the logging step itself fails.
 
 ## 2. Create the Apps Script
 
@@ -54,6 +55,9 @@ Pipeline (If_Check_Error)
    ```
 
 3. Set `TO` to the address that should receive the alerts.
+
+   The same script is available as a file: [`apps_script/Code.gs`](../apps_script/Code.gs). Copy its contents if you prefer that to the block above.
+
 4. Click **Deploy → New deployment → Web app**.
    - Execute as: **Me**
    - Who has access: **Anyone**
@@ -163,5 +167,5 @@ The labelled mail doubles as a run log (run IDs, counts, errors) that is easier 
 | Subject always says FAILED | The body does not start with a `Status:` line, or the script is still the old version. Deploy a new version. |
 | Email body shows `@concat(...)` text | The body was pasted as plain text. Re-enter it through **Add dynamic content** so it is saved as an expression. |
 | Pipeline fails with the email error instead of the real error | `Fail_Pipeline` is connected on **Succeeded** instead of **Completed**. Change the arrow. |
-| No success email even though the run worked | The success email runs only after `Stored_Procedure_Insert_Metadata` succeeds. If logging failed, check that procedure first. |
+| No success email even though the run worked | Check that the arrow from `Stored_Procedure_Insert_Metadata` into `If_Check_Error` is **Completed** (blue), not Succeeded. Then check the `Send_Success_Email` output in Fabric Monitor and **Apps Script → Executions**. |
 | Email is slow or the pipeline waits | The script is hanging. Fabric's minimum Web activity timeout is 10 minutes, so each attempt can wait that long. Keep retries at 1 and check **Apps Script → Executions**. |

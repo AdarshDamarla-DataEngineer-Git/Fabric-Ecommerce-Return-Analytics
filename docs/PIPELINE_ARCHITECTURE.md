@@ -163,6 +163,8 @@ Email setup: [EMAIL_NOTIFICATIONS.md](EMAIL_NOTIFICATIONS.md).
 Fabric-Ecommerce-Return-Analytics/
 ├── README.md                                  Project overview
 ├── Warehouse_Setup/                           Numbered T-SQL scripts (schemas, tables, procedures, watermark seed, reset)
+├── apps_script/Code.gs                        Google Apps Script that sends the pipeline emails
+├── LICENSE                                    MIT
 ├── docs/
 │   ├── PIPELINE_ARCHITECTURE.md               This file
 │   ├── BUSINESS_RULES.md                      Cleaning, validation and merge rules
