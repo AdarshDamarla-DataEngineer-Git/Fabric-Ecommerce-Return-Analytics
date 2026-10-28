@@ -1,3 +1,10 @@
+-- 07_SP_Insert_Pipeline_Metadata.sql
+-- Writes one audit row per pipeline run (idempotent on Pipeline_Run_ID).
+-- Change vs MyQueries/SP_Insert_Pipeline_Metadata.sql:
+--   @Error_Message is now VARCHAR(8000) and is cut to 2000 characters on insert, so a long
+--   Spark/pipeline error can no longer make this procedure fail (which would have stopped
+--   the failure email from being sent).
+
 CREATE   PROCEDURE Returns_Control.Insert_Pipeline_Metadata
     @Pipeline_Name           VARCHAR(100),
     @Pipeline_Run_ID         VARCHAR(100),
@@ -15,7 +22,7 @@ CREATE   PROCEDURE Returns_Control.Insert_Pipeline_Metadata
 
     @Start_Time              DATETIME2(6),
 
-    @Error_Message           VARCHAR(8000) = NULL
+    @Error_Message           VARCHAR(8000) = NULL   -- accepts long pipeline/Spark errors
 AS
 BEGIN
 
@@ -97,7 +104,7 @@ BEGIN
         @Duration_Seconds,
 
         @Load_Status,
-        @Error_Message
+        LEFT(@Error_Message, 2000)   -- column is VARCHAR(2000); cut here so the INSERT cannot fail on a long message
     );
 
 END;
