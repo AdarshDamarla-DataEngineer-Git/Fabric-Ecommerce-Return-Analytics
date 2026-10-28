@@ -522,7 +522,7 @@
             },
             "Error_Message": {
               "value": {
-                "value": "@variables('error_message')",
+                "value": "@if( empty(variables('error_message')),\n     variables('error_message'),\n     substring( variables('error_message'), 0, min( length(variables('error_message')), 7500 ) ) )",
                 "type": "Expression"
               },
               "type": "String"
@@ -762,7 +762,7 @@
                 {
                   "activity": "Send_Failure_Email",
                   "dependencyConditions": [
-                    "Succeeded"
+                    "Completed"
                   ]
                 }
               ]
@@ -797,14 +797,17 @@
               "typeProperties": {
                 "method": "POST",
                 "headers": {},
-                "body": "@concat('Status: SUCCEEDED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processed: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'), 'Silver records: ', string(variables('silver_record_processed')), decodeUriComponent('%0A'), 'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')))"
+                "body": {
+                  "value": "@concat('Status: SUCCEEDED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processed: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'), 'Silver records: ', string(variables('silver_record_processed')), decodeUriComponent('%0A'), 'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')))",
+                  "type": "Expression"
+                }
               },
               "externalReferences": {
                 "connection": "3ef0f4d2-39a1-426f-b24c-b987422a024f"
               },
               "policy": {
                 "timeout": "0.00:15:00",
-                "retry": 2,
+                "retry": 1,
                 "retryIntervalInSeconds": 30,
                 "secureInput": false,
                 "secureOutput": false
