@@ -103,7 +103,7 @@
       {
         "type": "TridentNotebook",
         "typeProperties": {
-          "notebookId": "dd6bf2eb-83e7-924a-4b91-da8a71782551",
+          "notebookId": "e341156d-2d27-9319-4732-208c1f8dee6f",
           "workspaceId": "00000000-0000-0000-0000-000000000000",
           "parameters": {
             "p_year": {
@@ -120,7 +120,8 @@
               },
               "type": "string"
             }
-          }
+          },
+          "sessionTag": "returns_load"
         },
         "policy": {
           "timeout": "0.00:15:00",
@@ -142,7 +143,7 @@
       {
         "type": "TridentNotebook",
         "typeProperties": {
-          "notebookId": "9159830b-9b3f-8bd6-47e5-671879d06d39",
+          "notebookId": "63b5a2f0-e2f6-ade8-4f1b-0efbecc36361",
           "workspaceId": "00000000-0000-0000-0000-000000000000",
           "parameters": {
             "p_year": {
@@ -159,7 +160,8 @@
               },
               "type": "string"
             }
-          }
+          },
+          "sessionTag": "returns_load"
         },
         "policy": {
           "timeout": "0.00:15:00",
@@ -171,7 +173,7 @@
         "name": "Silver_Gold_Stg_Notebook",
         "dependsOn": [
           {
-            "activity": "Wait",
+            "activity": "Set_silver_record_processed",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -206,21 +208,6 @@
         "dependsOn": [
           {
             "activity": "Set_gold_fact_Stg_record_processed",
-            "dependencyConditions": [
-              "Succeeded"
-            ]
-          }
-        ]
-      },
-      {
-        "type": "Wait",
-        "typeProperties": {
-          "waitTimeInSeconds": 30
-        },
-        "name": "Wait",
-        "dependsOn": [
-          {
-            "activity": "Set_silver_record_processed",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -535,7 +522,7 @@
             },
             "Error_Message": {
               "value": {
-                "value": "@variables('error_message')",
+                "value": "@if( empty(variables('error_message')),\n     variables('error_message'),\n     substring( variables('error_message'), 0, min( length(variables('error_message')), 7500 ) ) )",
                 "type": "Expression"
               },
               "type": "String"
@@ -674,6 +661,13 @@
               "Succeeded",
               "Skipped"
             ]
+          },
+          {
+            "activity": "Set_Error_watermark_month_name",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
           }
         ]
       },
@@ -764,17 +758,71 @@
                 "errorCode": "PIPELINE_STAGE_FAILED"
               },
               "name": "Fail_Pipeline",
+              "dependsOn": [
+                {
+                  "activity": "Send_Failure_Email",
+                  "dependencyConditions": [
+                    "Completed"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "WebActivity",
+              "typeProperties": {
+                "method": "POST",
+                "headers": {},
+                "body": {
+                  "value": "@concat('Status: FAILED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processing: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Error: ', variables('error_message'))",
+                  "type": "Expression"
+                }
+              },
+              "externalReferences": {
+                "connection": "3ef0f4d2-39a1-426f-b24c-b987422a024f"
+              },
+              "policy": {
+                "timeout": "0.00:15:00",
+                "retry": 1,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Send_Failure_Email",
               "dependsOn": []
             }
           ],
-          "ifFalseActivities": []
+          "ifFalseActivities": [
+            {
+              "type": "WebActivity",
+              "typeProperties": {
+                "method": "POST",
+                "headers": {},
+                "body": {
+                  "value": "@concat('Status: SUCCEEDED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processed: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'), 'Silver records: ', string(variables('silver_record_processed')), decodeUriComponent('%0A'), 'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')))",
+                  "type": "Expression"
+                }
+              },
+              "externalReferences": {
+                "connection": "3ef0f4d2-39a1-426f-b24c-b987422a024f"
+              },
+              "policy": {
+                "timeout": "0.00:15:00",
+                "retry": 1,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Send_Success_Email",
+              "dependsOn": []
+            }
+          ]
         },
         "name": "If_Check_Error",
         "dependsOn": [
           {
             "activity": "Stored_Procedure_Insert_Metadata",
             "dependencyConditions": [
-              "Succeeded"
+              "Completed"
             ]
           }
         ]
@@ -796,6 +844,29 @@
         "dependsOn": [
           {
             "activity": "Lookup_Watermark",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat('Set_watermark_month_name Failed: invalid reprocess input (year=', pipeline().parameters.reprocess_year, ', month=', pipeline().parameters.reprocess_month, ')')",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_watermark_month_name",
+        "dependsOn": [
+          {
+            "activity": "Set_watermark_month_name",
             "dependencyConditions": [
               "Failed"
             ]
