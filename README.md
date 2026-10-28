@@ -257,13 +257,7 @@ ORDER BY Start_Time DESC;
 
 ## Scope and Future Evolution
 
-This project covers ingestion, transformation, modelling, data quality, orchestration, auditing and alerting for a single monthly dataset. Natural next steps for a production setup:
-
-- A Power BI semantic model and report on top of the Gold schema.
-- A schedule on the pipeline, plus a separate `[NO NEW FILE]` notification so a missing month does not look like a failure.
-- Secrets and connection details managed outside the pipeline definition.
-- Automated tests for the validation rules and a deployment pipeline between workspaces.
-- Dimension history (Type 2) if product or customer attribute changes need to be tracked.
+This project covers ingestion, transformation, modelling, data quality, orchestration, auditing and alerting for a single monthly dataset. The natural next step is a Power BI semantic model and report on top of the Gold schema.
 
 ## Author
 
