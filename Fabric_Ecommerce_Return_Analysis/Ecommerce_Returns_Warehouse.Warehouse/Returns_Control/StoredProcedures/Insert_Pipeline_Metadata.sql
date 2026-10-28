@@ -15,7 +15,7 @@ CREATE   PROCEDURE Returns_Control.Insert_Pipeline_Metadata
 
     @Start_Time              DATETIME2(6),
 
-    @Error_Message           VARCHAR(2000) = NULL
+    @Error_Message           VARCHAR(8000) = NULL
 AS
 BEGIN
 
