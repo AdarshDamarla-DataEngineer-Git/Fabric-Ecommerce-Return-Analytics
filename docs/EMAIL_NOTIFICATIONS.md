@@ -93,7 +93,7 @@ In the pipeline, open `If_Check_Error` and go into the **True** branch.
    ```
 
 4. Connect `Send_Failure_Email` to `Fail_Pipeline` with the **Completed** (blue) arrow, so the pipeline still fails with the real error even if the email could not be sent.
-5. Set a short timeout, for example `0.00:02:00` with 1 retry, so a problem with the script cannot hold the pipeline for the default period.
+5. Use the shortest timeout the Fabric portal allows (the minimum is 10 minutes) and 1 retry, so a problem with the script cannot hold the pipeline for long.
 6. Save.
 
 `decodeUriComponent('%0A')` inserts a line break. The body is plain text, so no JSON escaping of the error message is needed.
@@ -164,4 +164,4 @@ The labelled mail doubles as a run log (run IDs, counts, errors) that is easier 
 | Email body shows `@concat(...)` text | The body was pasted as plain text. Re-enter it through **Add dynamic content** so it is saved as an expression. |
 | Pipeline fails with the email error instead of the real error | `Fail_Pipeline` is connected on **Succeeded** instead of **Completed**. Change the arrow. |
 | No success email even though the run worked | The success email runs only after `Stored_Procedure_Insert_Metadata` succeeds. If logging failed, check that procedure first. |
-| Email is slow or the pipeline waits | A long Web activity timeout. Use 2 minutes with 1 retry. |
+| Email is slow or the pipeline waits | The script is hanging. Fabric's minimum Web activity timeout is 10 minutes, so each attempt can wait that long. Keep retries at 1 and check **Apps Script → Executions**. |
