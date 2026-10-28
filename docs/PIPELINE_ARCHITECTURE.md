@@ -151,7 +151,7 @@ The model uses natural business keys (no surrogate keys) and joins on those valu
 
 - Every stage has its own `Set_Error_*` activity that runs on failure and stores a message such as `Bronze_Silver_Notebook Failed: <error>`.
 - `Insert_Pipeline_Metadata` runs whether the stages succeeded or failed, and derives the status: **Success**, **No Source File**, or **Failed**.
-- `If_Check_Error` then decides the outcome. On error it emails and fails the pipeline with the code `PIPELINE_STAGE_FAILED`, so the run shows as failed in Fabric Monitor. Otherwise it emails a success summary.
+- `If_Check_Error` then decides the outcome. It runs after the logging step **completes** (succeeded or failed), so an email is sent even if logging fails. On error it emails and fails the pipeline with the code `PIPELINE_STAGE_FAILED`, so the run shows as failed in Fabric Monitor. Otherwise it emails a success summary.
 - Row-level problems are not pipeline failures. They are quarantined and the run continues; the quarantined count is printed in the notebook output.
 - Pipeline and structural problems (missing Silver table, missing required Silver column, staging row-count mismatch, invalid parameters) raise errors and fail the stage.
 
