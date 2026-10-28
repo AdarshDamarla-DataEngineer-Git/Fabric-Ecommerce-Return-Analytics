@@ -70,7 +70,7 @@ To change the script later, use **Deploy → Manage deployments → pencil → V
 1. In Fabric: **Settings (gear) → Manage connections and gateways → New**.
 2. Choose **Cloud** (not a virtual network or on-premises gateway; the script is a public URL).
 3. Connection type: **Web v2**.
-4. Connection name: for example `GAS_Failure_Email_Webhook`.
+4. Connection name: for example `Email_GoogleAppsScript_Webhook`.
 5. Base URL: the `/exec` URL from step 2.
 6. Authentication: **Anonymous**.
 7. Save.
@@ -84,7 +84,7 @@ In the pipeline, open `If_Check_Error` and go into the **True** branch.
 
    | Setting | Value |
    |---|---|
-   | Connection | `GAS_Failure_Email_Webhook` |
+   | Connection | `Email_GoogleAppsScript_Webhook` |
    | Relative URL | empty |
    | Method | `POST` |
    | Headers | `Content-Type` = `text/plain` |
