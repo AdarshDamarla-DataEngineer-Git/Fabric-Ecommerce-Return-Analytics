@@ -822,7 +822,7 @@
           {
             "activity": "Stored_Procedure_Insert_Metadata",
             "dependencyConditions": [
-              "Succeeded"
+              "Completed"
             ]
           }
         ]
