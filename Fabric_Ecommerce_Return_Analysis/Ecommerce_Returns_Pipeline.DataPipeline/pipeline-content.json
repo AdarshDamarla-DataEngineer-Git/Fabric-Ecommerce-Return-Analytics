@@ -119,6 +119,13 @@
                 "type": "Expression"
               },
               "type": "string"
+            },
+            "p_run_id": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "string"
             }
           },
           "sessionTag": "returns_load"
@@ -156,6 +163,13 @@
             "p_month": {
               "value": {
                 "value": "@variables('watermark_month')",
+                "type": "Expression"
+              },
+              "type": "string"
+            },
+            "p_run_id": {
+              "value": {
+                "value": "@pipeline().RunId",
                 "type": "Expression"
               },
               "type": "string"
@@ -822,7 +836,7 @@
           {
             "activity": "Stored_Procedure_Insert_Metadata",
             "dependencyConditions": [
-              "Completed"
+              "Succeeded"
             ]
           }
         ]
