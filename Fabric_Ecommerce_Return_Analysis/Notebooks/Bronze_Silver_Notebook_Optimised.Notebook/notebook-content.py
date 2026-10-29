@@ -25,6 +25,7 @@
 p_year=""
 p_month=""
 p_run_id=""
+p_max_reject_pct="5"
 
 # METADATA ********************
 
@@ -301,6 +302,12 @@ def validate_parameters():
 
     if not re.fullmatch(r"\d{1,2}", str(p_month).strip()) or not (1 <= int(p_month) <= 12):
         raise ValueError(f"p_month must be between 1 and 12, got '{p_month}'")
+
+    try:
+        if not (0 <= float(p_max_reject_pct) <= 100):
+            raise ValueError
+    except ValueError:
+        raise ValueError(f"p_max_reject_pct must be a number between 0 and 100, got '{p_max_reject_pct}'")
 
 
 def read_bronze():
@@ -617,6 +624,25 @@ def count_rows(df):
     return total, valid, total - valid
 
 
+def enforce_reject_threshold(input_count, valid_count, quarantine_count):
+    """Stop before touching Silver when too many rows were rejected (usually a broken source file).
+    The quarantine table is already written, so the rejected rows can be inspected.
+    Raising makes the pipeline take its failure path: failure email, watermark not advanced."""
+    reject_pct = (quarantine_count / input_count * 100) if input_count else 0.0
+    print(f"Reject rate: {reject_pct:.1f}% (limit {float(p_max_reject_pct):g}%)")
+
+    if reject_pct > float(p_max_reject_pct):
+        message = (f"Reject rate {reject_pct:.1f}% exceeds the {float(p_max_reject_pct):g}% limit "
+                   f"({quarantine_count} of {input_count} rows quarantined)")
+        write_audit(
+            status="Rejected", input_rows=input_count, valid_rows=valid_count,
+            quarantined_rows=quarantine_count, rows_written=0, rows_inserted=0, rows_updated=0,
+            source_path=sourceFilePath, target_path=targetFilePath, quarantine_path=quarantinePath,
+            message=message,
+        )
+        raise Exception(f"{message}. Silver not loaded. Check {quarantinePath}")
+
+
 def write_quarantine(quarantine_df, quarantine_count):
     """Overwrite, so a re-run of the same month does not duplicate quarantined rows."""
     quarantine_df.write \
@@ -733,6 +759,8 @@ write_quarantine(quarantine_df, quarantine_count)
 print(f"Input rows (after exact de-dup): {input_count}")
 print(f"Valid rows: {valid_count}")
 print(f"Quarantined rows: {quarantine_count} -> {quarantinePath}")
+
+enforce_reject_threshold(input_count, valid_count, quarantine_count)
 
 merge_metrics = load_silver(valid_df, valid_count)
 silver_record_processed_count = valid_count

@@ -787,7 +787,7 @@
                 "method": "POST",
                 "headers": {},
                 "body": {
-                  "value": "@concat('Status: FAILED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processing: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Error: ', variables('error_message'))",
+                  "value": "@concat(\n    'Status: FAILED', decodeUriComponent('%0A'),\n    'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'),\n    'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'),\n    'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'),\n    'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'),\n    'Duration: ', string(div(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' min ', string(mod(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' sec', decodeUriComponent('%0A'),\n    'Processing: ', variables('watermark_year'), '-', variables('watermark_month_name'),\n    decodeUriComponent('%0A'), decodeUriComponent('%0A'),\n    'Completed before the failure:', decodeUriComponent('%0A'),\n    'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'),\n    'Silver records (valid): ', string(variables('silver_record_processed')), decodeUriComponent('%0A'),\n    'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')),\n    decodeUriComponent('%0A'), decodeUriComponent('%0A'),\n    'Error: ', variables('error_message'),\n    decodeUriComponent('%0A'), decodeUriComponent('%0A'),\n    'Run details: https://app.fabric.microsoft.com/workloads/data-pipeline/monitoring/workspaces/', pipeline().DataFactory,\n    '/pipelines/', pipeline().Pipeline, '/', pipeline().RunId\n)",
                   "type": "Expression"
                 }
               },
@@ -812,7 +812,7 @@
                 "method": "POST",
                 "headers": {},
                 "body": {
-                  "value": "@concat('Status: SUCCEEDED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processed: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'), 'Silver records: ', string(variables('silver_record_processed')), decodeUriComponent('%0A'), 'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')))",
+                  "value": "@concat(\n    'Status: SUCCEEDED', decodeUriComponent('%0A'),\n    'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'),\n    'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'),\n    'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'),\n    'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'),\n    'Duration: ', string(div(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' min ', string(mod(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' sec', decodeUriComponent('%0A'),\n    'Processed: ', variables('watermark_year'), '-', variables('watermark_month_name'),\n    decodeUriComponent('%0A'), decodeUriComponent('%0A'),\n    'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'),\n    'Silver records (valid): ', string(variables('silver_record_processed')), decodeUriComponent('%0A'),\n    'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')), decodeUriComponent('%0A'),\n    'Rejected at Silver (Bronze - Silver): ', string(sub(int(variables('bronze_record_processed')), int(variables('silver_record_processed')))), ' (', string(div(div(add(mul(sub(int(variables('bronze_record_processed')), int(variables('silver_record_processed'))),1000),div(max(int(variables('bronze_record_processed')),1),2)),max(int(variables('bronze_record_processed')),1)),10)), '.', string(mod(div(add(mul(sub(int(variables('bronze_record_processed')), int(variables('silver_record_processed'))),1000),div(max(int(variables('bronze_record_processed')),1),2)),max(int(variables('bronze_record_processed')),1)),10)), '%', ')', decodeUriComponent('%0A'),\n    'Rejected at Gold (Silver - Gold staging): ', string(sub(int(variables('silver_record_processed')), int(variables('gold_fact_Stg_record_processed')))), ' (', string(div(div(add(mul(sub(int(variables('silver_record_processed')), int(variables('gold_fact_Stg_record_processed'))),1000),div(max(int(variables('silver_record_processed')),1),2)),max(int(variables('silver_record_processed')),1)),10)), '.', string(mod(div(add(mul(sub(int(variables('silver_record_processed')), int(variables('gold_fact_Stg_record_processed'))),1000),div(max(int(variables('silver_record_processed')),1),2)),max(int(variables('silver_record_processed')),1)),10)), '%', ')',\n    decodeUriComponent('%0A'), decodeUriComponent('%0A'),\n    'Run details: https://app.fabric.microsoft.com/workloads/data-pipeline/monitoring/workspaces/', pipeline().DataFactory,\n    '/pipelines/', pipeline().Pipeline, '/', pipeline().RunId\n)",
                   "type": "Expression"
                 }
               },
@@ -834,8 +834,9 @@
         "name": "If_Check_Error",
         "dependsOn": [
           {
-            "activity": "Stored_Procedure_Insert_Metadata",
+            "activity": "Set_Error_Stored_Procedure_Insert_Metadata",
             "dependencyConditions": [
+              "Skipped",
               "Succeeded"
             ]
           }
@@ -881,6 +882,29 @@
         "dependsOn": [
           {
             "activity": "Set_watermark_month_name",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Stored_Procedure_Insert_Metadata Failed: ',\n    activity('Stored_Procedure_Insert_Metadata').error.message\n    )",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Stored_Procedure_Insert_Metadata",
+        "dependsOn": [
+          {
+            "activity": "Stored_Procedure_Insert_Metadata",
             "dependencyConditions": [
               "Failed"
             ]

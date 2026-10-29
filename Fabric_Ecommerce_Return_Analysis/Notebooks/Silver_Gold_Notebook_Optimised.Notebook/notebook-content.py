@@ -25,6 +25,7 @@
 p_year=""
 p_month=""
 p_run_id=""
+p_max_reject_pct="5"
 
 # METADATA ********************
 
@@ -241,6 +242,13 @@ def validate_parameters():
     if not re.fullmatch(r"\d{1,2}", str(p_month).strip()) or not (1 <= int(p_month) <= 12):
         raise ValueError(f"p_month must be between 1 and 12, got '{p_month}'")
 
+    try:
+        if not (0 <= float(p_max_reject_pct) <= 100):
+            raise ValueError
+    except ValueError:
+        raise ValueError(f"p_max_reject_pct must be a number between 0 and 100, got '{p_max_reject_pct}'")
+
+
 
 def read_silver_month():
     """Read the Silver table and return (all_silver_df, rows_for_the_requested_month).
@@ -410,6 +418,24 @@ def write_quarantine(quarantine_df):
         .save(quarantinePath)
 
 
+def enforce_reject_threshold(input_count, valid_count, quarantine_count):
+    """Stop before touching the staging tables when too many rows were rejected.
+    The quarantine table is already written, so the rejected rows can be inspected.
+    Raising makes the pipeline take its failure path: failure email, watermark not advanced."""
+    reject_pct = (quarantine_count / input_count * 100) if input_count else 0.0
+    print(f"Reject rate: {reject_pct:.1f}% (limit {float(p_max_reject_pct):g}%)")
+
+    if reject_pct > float(p_max_reject_pct):
+        message = (f"Reject rate {reject_pct:.1f}% exceeds the {float(p_max_reject_pct):g}% limit "
+                   f"({quarantine_count} of {input_count} rows quarantined)")
+        write_audit(
+            status="Rejected", silver_rows_read=input_count, valid_rows=valid_count,
+            quarantined_rows=quarantine_count, source_path=sourceFilePath,
+            target_schema=f"{Target_Warehouse}.{Target_Schema}", quarantine_path=quarantinePath,
+            message=message,
+        )
+        raise Exception(f"{message}. Staging not loaded. Check {quarantinePath}")
+
 # METADATA ********************
 
 # META {
@@ -545,6 +571,8 @@ print(f"Quarantined rows: {quarantine_count} -> {quarantinePath}")
 
 if input_count == 0:
     print("WARNING: no silver rows for this month, staging tables will be emptied.")
+
+enforce_reject_threshold(input_count, valid_count, quarantine_count)
 
 # METADATA ********************
 
