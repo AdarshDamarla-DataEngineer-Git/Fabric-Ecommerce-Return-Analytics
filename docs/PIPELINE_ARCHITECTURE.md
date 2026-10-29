@@ -36,6 +36,7 @@ flowchart LR
 | Staging | Warehouse schema `Returns_Staging` | Tables `*_stg` | Overwritten each run with the month's facts and dimensions |
 | Gold | Warehouse schema `Returns_Gold` | Tables | Star schema, upserted |
 | Control | Warehouse schema `Returns_Control` | Tables | Watermark and run metadata |
+| Notebook audit | Lakehouse table `notebook_audit` | Delta | One row per notebook run (counts, status, duration) |
 
 ## Pipeline flow
 
@@ -153,6 +154,7 @@ The model uses natural business keys (no surrogate keys) and joins on those valu
 - `Insert_Pipeline_Metadata` runs whether the stages succeeded or failed, and derives the status: **Success**, **No Source File**, or **Failed**.
 - `If_Check_Error` then decides the outcome. It runs after the logging step **completes** (succeeded or failed), so an email is sent even if logging fails. On error it emails and fails the pipeline with the code `PIPELINE_STAGE_FAILED`, so the run shows as failed in Fabric Monitor. Otherwise it emails a success summary.
 - Row-level problems are not pipeline failures. They are quarantined and the run continues; the quarantined count is printed in the notebook output.
+- **Notebook audit table.** At the end of each run, `Bronze_Silver_Notebook_Optimised` and `Silver_Gold_Notebook_Optimised` append one row to the Lakehouse Delta table `notebook_audit`: notebook, layer, year and month, status (`Success` or `No Data`), start, end and duration, input, valid, quarantined and written row counts, rows inserted and updated (Bronze to Silver only), source, target and quarantine paths, schema-drift and missing-column lists, Spark application ID and, if the pipeline passes it as `p_run_id`, the pipeline run ID. Writing the audit row never fails a notebook, and a run that fails earlier is recorded by `Pipeline_Metadata` instead.
 - Pipeline and structural problems (missing Silver table, missing required Silver column, staging row-count mismatch, invalid parameters) raise errors and fail the stage.
 
 Email setup: [EMAIL_NOTIFICATIONS.md](EMAIL_NOTIFICATIONS.md).

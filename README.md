@@ -68,6 +68,7 @@ The pipeline is the single orchestrator: it decides which month to load from the
 | Staging | Warehouse `Returns_Staging` | `*_stg` tables | Overwritten each run, row counts verified | Landing area for the merge |
 | Gold | Warehouse `Returns_Gold` | Tables | Transactional MERGE | Star schema for reporting |
 | Control | Warehouse `Returns_Control` | Tables | Watermark and run log | Incremental loading and audit |
+| Notebook audit | Lakehouse table `notebook_audit` | Delta | One row appended per notebook run | Row counts and status per layer |
 
 ## Dimensional Model
 
@@ -222,6 +223,7 @@ It does not recover by itself once the retry is used up: a failed stage stops th
 ## Validation
 
 - **Per-run audit:** every run adds a row to `Returns_Control.Pipeline_Metadata` with Bronze, Silver, Gold-staging and Gold-final row counts, duration and status.
+- **Notebook audit:** each notebook appends a row to the Lakehouse table `notebook_audit` with its input, valid, quarantined and written row counts, inserted/updated counts, status and duration. Pass `@pipeline().RunId` as `p_run_id` to join it to `Pipeline_Metadata`.
 - **Staging read-back:** each `*_stg` table is counted after writing and compared with the expected count.
 - **Quarantine summary:** the notebooks print the number of rejected rows and a count per failed rule.
 - **Email:** the success email carries the processed month and row counts; the failure email carries the error text.
