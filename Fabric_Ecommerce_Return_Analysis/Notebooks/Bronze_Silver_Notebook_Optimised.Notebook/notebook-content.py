@@ -25,6 +25,8 @@
 p_year=""
 p_month=""
 p_run_id=""
+
+# Fail the run when more than this percentage of rows is quarantined (Silver is then not loaded)
 p_max_reject_pct="5"
 
 # METADATA ********************

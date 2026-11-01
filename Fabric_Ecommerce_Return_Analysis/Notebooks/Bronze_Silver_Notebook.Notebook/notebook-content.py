@@ -39,20 +39,16 @@ p_max_reject_pct="5"
 # MARKDOWN ********************
 
 # # Bronze → Silver
-#
-# Cleans, validates and loads one month of ecommerce returns data from the Bronze layer into the Silver Delta table.
-#
-# | | |
+# # Cleans, validates and loads one month of ecommerce returns data from the Bronze layer into the Silver Delta table.
+# # | | |
 # |---|---|
 # | **Input** | `Files/bronze/ecommerce_returns/year=<p_year>/month=<p_month>/` (parquet) |
 # | **Output** | `Files/silver/ecommerce_returns/` (Delta, merged on `Order_Line_ID`) |
 # | **Quarantine** | `Files/quarantine/ecommerce_returns/bronze_silver/year=<p_year>/month=<p_month>/` (Delta, rejected rows + reasons) |
 # | **Audit** | one row appended to the Lakehouse table `audit_bronze_silver` |
 # | **Exit value** | number of rows loaded into Silver (`"0"` when there is no bronze data) |
-#
-# **Parameters** (first cell): `p_year`, `p_month`, optional `p_run_id` (pass `@pipeline().RunId` to link audit rows to the pipeline run).
-#
-# **Flow:** validate parameters → read bronze → check schema (fail on missing mandatory or new columns; fill other missing columns with NULL) → keep raw copy → clean → validate rows → de-duplicate keys → split valid / quarantine → merge into Silver → audit → exit.
+# # **Parameters** (first cell): `p_year`, `p_month`, optional `p_run_id` (pass `@pipeline().RunId` to link audit rows to the pipeline run).
+# # **Flow:** validate parameters → read bronze → check schema (fail on missing mandatory or new columns; fill other missing columns with NULL) → keep raw copy → clean → validate rows → de-duplicate keys → split valid / quarantine → merge into Silver → audit → exit.
 
 # MARKDOWN ********************
 
@@ -289,8 +285,7 @@ def write_audit(status, input_rows=None, valid_rows=None, quarantined_rows=None,
 # MARKDOWN ********************
 
 # ## 4. Functions
-#
-# Each function below does one step of the flow and returns the new DataFrame (plus any extra information the later steps need).
+# # Each function below does one step of the flow and returns the new DataFrame (plus any extra information the later steps need).
 
 # MARKDOWN ********************
 
@@ -474,8 +469,7 @@ def clean_data(df):
 # MARKDOWN ********************
 
 # ### 4.4 Row-level validation
-#
-# `build_checks` returns a list of conditions; each one yields a message when the rule fails.
+# # `build_checks` returns a list of conditions; each one yields a message when the rule fails.
 # All messages for a row are joined into `Validation_Errors`, and rows with any message are quarantined.
 
 # CELL ********************
