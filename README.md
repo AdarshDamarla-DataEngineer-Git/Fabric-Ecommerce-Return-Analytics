@@ -174,7 +174,7 @@ erDiagram
 The source is a monthly file, and the right month to load depends on what has already succeeded, not on the calendar. The watermark moves only after the Gold merge succeeds, so a failed run retries the same month on the next run.
 
 ### Why quarantine bad rows instead of failing the run?
-One malformed row should not block a whole month of good data. Each rejected row keeps its original values and the full list of failed rules, so it can be fixed at the source and reprocessed. Only structural problems (missing file, missing required columns, invalid parameters) fail a run.
+One malformed row should not block a whole month of good data. Each rejected row keeps its original values and the full list of failed rules, so it can be fixed at the source and reprocessed. A run fails only for structural problems (missing file, missing mandatory columns, new unexpected columns, invalid parameters) or when more than 5% of a month's rows are quarantined (`p_max_reject_pct`), which usually points to a broken source file.
 
 ### Why validate twice (Bronze to Silver, then Silver to Gold)?
 The first pass cleans raw text and enforces data quality. The second protects the warehouse: it re-checks the fields reporting depends on, builds the dimensions, and confirms staging row counts before anything reaches Gold.
