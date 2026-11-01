@@ -9,8 +9,8 @@
 
 An end-to-end, month-by-month data pipeline on Microsoft Fabric. It loads e-commerce order and returns files from GitHub, cleans and validates them through a **Bronze → Silver → Gold** medallion architecture, and publishes a star schema in a Fabric Warehouse for returns and refund analysis. Bad rows are quarantined with reasons, every run is audited, and success or failure is emailed without Microsoft 365.
 
-**Author:** Adarsh Damarla
-**Platform:** Microsoft Fabric (Lakehouse, Warehouse, Data Pipeline, Notebooks)
+**Author:** Adarsh Damarla<br>
+**Platform:** Microsoft Fabric (Lakehouse, Warehouse, Data Pipeline, Notebooks)<br>
 **Status:** Complete for the 2025 dataset (12 monthly files)
 
 ## Table of Contents
@@ -271,5 +271,5 @@ Released under the [MIT License](LICENSE).
 
 ## Author
 
-**Adarsh Damarla**
+**Adarsh Damarla**<br>
 GitHub: [AdarshDamarla-DataEngineer-Git](https://github.com/AdarshDamarla-DataEngineer-Git)
