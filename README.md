@@ -68,6 +68,7 @@ The pipeline is the single orchestrator: it decides which month to load from the
 | Staging | Warehouse `Returns_Staging` | `*_stg` tables | Overwritten each run, row counts verified | Landing area for the merge |
 | Gold | Warehouse `Returns_Gold` | Tables | Transactional MERGE | Star schema for reporting |
 | Control | Warehouse `Returns_Control` | Tables | Watermark and run log | Incremental loading and audit |
+| Notebook audit | Lakehouse tables `audit_bronze_silver`, `audit_silver_gold` | Delta | One row appended per notebook run, one table per notebook | Row counts and status per layer |
 
 ## Dimensional Model
 
@@ -192,7 +193,8 @@ The built-in Office 365 Outlook activity needs a Microsoft 365 mailbox. A Web ac
 | Situation | Behaviour |
 |---|---|
 | Bad rows (invalid IDs, dates, amounts, values, rule breaks) | Quarantined with the reasons; the rest of the month loads |
-| Missing or new columns in the source file | Missing columns are filled with NULL (and quarantined if mandatory); new columns are flagged as schema drift instead of breaking the load |
+| Too many bad rows (more than 5% of a month, usually a broken source file) | The notebook fails before loading: Silver or staging is not touched, the quarantine is kept for inspection, the failure email is sent and the watermark does not advance |
+| Missing or new columns in the source file | A missing mandatory column or a new (unexpected) column fails the run before anything is loaded; a missing non-mandatory column is filled with NULL |
 | Empty Bronze month | The notebook exits cleanly with 0 rows |
 | Duplicate rows or duplicate `Order_Line_ID` values | Exact duplicates removed; extra keys quarantined so merges never fail on duplicate keys |
 | Temporary failure of a stage | Main activities retry once after 30 seconds |
@@ -212,7 +214,7 @@ It does not recover by itself once the retry is used up: a failed stage stops th
 | Inconsistent labels (`UPI`, `wallet`, `COD`, `Not As Expected`) | Standardize case and map known variants before validating against allowed values |
 | Returns data that contradicts itself (a return date on a non-returned order, return quantity above quantity) | Cross-field rules tie `Return_Flag`, `Return_Date`, `Return_Reason` and quantities together |
 | The same `Order_Line_ID` appearing twice breaks a MERGE | Keep the best row per key and quarantine the rest before the merge |
-| Source columns added or removed between files | Fill missing columns with NULL, flag new ones as schema drift, quarantine rows that carry values in them |
+| Source columns added or removed between files | Fail on a new column (schema drift) or a missing mandatory column; fill other missing columns with NULL |
 | Reruns must not duplicate data | Upserts on the business key; overwrite for staging and quarantine |
 | A failure halfway through the Gold merge | One transaction with rollback, and the error re-raised to the pipeline |
 | Knowing what happened in each run | Per-stage error messages and a metadata row for every run |
@@ -222,6 +224,7 @@ It does not recover by itself once the retry is used up: a failed stage stops th
 ## Validation
 
 - **Per-run audit:** every run adds a row to `Returns_Control.Pipeline_Metadata` with Bronze, Silver, Gold-staging and Gold-final row counts, duration and status.
+- **Notebook audit:** each notebook appends a row to its own Lakehouse table (`audit_bronze_silver`, `audit_silver_gold`) with its row counts, status (`Success`, `No Data` or `Rejected`) and duration; the Bronze table also has inserted/updated counts and the Gold table has one count per staging table. Pass `@pipeline().RunId` as `p_run_id` to join it to `Pipeline_Metadata`.
 - **Staging read-back:** each `*_stg` table is counted after writing and compared with the expected count.
 - **Quarantine summary:** the notebooks print the number of rejected rows and a count per failed rule.
 - **Email:** the success email carries the processed month and row counts; the failure email carries the error text.

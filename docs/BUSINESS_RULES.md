@@ -2,7 +2,7 @@
 
 This document lists every rule the pipeline applies to the returns data. Rules live in the two notebooks and the Warehouse stored procedures; this file is the plain-language reference.
 
-**Principle:** a row that breaks a rule is **quarantined**, not deleted and not allowed to stop the run. A row can break several rules at once and all reasons are recorded. Only structural problems (a missing file, missing required columns, invalid parameters, a staging count mismatch) fail the pipeline.
+**Principle:** a row that breaks a rule is **quarantined**, not deleted and not allowed to stop the run. A row can break several rules at once and all reasons are recorded. Only structural problems (a missing file, missing mandatory or new columns in the source file, missing required Silver columns, invalid parameters, a staging count mismatch) fail the pipeline.
 
 ## Contents
 
@@ -43,8 +43,8 @@ Applied before validation, in this order.
 | 2.7 | `Not As Expected` in `Return_Reason` becomes `Product Not As Expected`. |
 | 2.8 | **Return flag:** `Yes`, `Y`, `Returned` (any case) become `Yes`. Every other value becomes `No`. The original text is still checked in rule 3.9. |
 | 2.9 | `Order_Year` and `Order_Month` are derived from `Order_Date`. |
-| 2.10 | A source column that is missing is added as NULL (and then fails the mandatory check if it is a mandatory column). A Silver column missing from the source is also added as NULL. |
-| 2.11 | **Schema drift:** a new source column that is not in Silver and not expected is logged as a warning, left out of Silver, and any row that has a value in it is quarantined. |
+| 2.10 | **Missing columns.** If a mandatory column (`Order_Line_ID`, `Order_ID`, `Order_Date`, `Customer_ID`, `Product_ID`, `Quantity`, `Unit_Price`, `Sales_Channel`, `Payment_Method`) is missing from the source file, the notebook **fails** before loading anything. Any other missing column is added as NULL, and so is a Silver column missing from the source. |
+| 2.11 | **Schema drift.** A source column that is neither expected (`REFERENCED_COLS`) nor already in Silver makes the notebook **fail** before loading anything, even if the column is empty. The error names the column(s). Add the column to the notebook's column list (and the Silver/Gold design) before loading that file. |
 
 ## 3. Bronze to Silver: validation
 
@@ -129,6 +129,10 @@ The Silver table is trusted but checked again, because Gold is what reporting us
 | Follow-up | Fix the source file or the rule, then reprocess the month with the pipeline parameters. |
 
 Quarantined rows are **not** included in the Silver or Gold counts.
+
+### 5.1 Reject rate limit
+
+After validation, each notebook computes `quarantined rows ÷ input rows × 100`. If it is above `p_max_reject_pct` (default **5**), the notebook writes the quarantine table, records an audit row with status `Rejected`, and fails before loading Silver (Bronze to Silver) or the staging tables (Silver to Gold). The pipeline then sends the failure email and the watermark does not advance. A month with no rows is not rejected. The limit is a notebook parameter and can be overridden per run in the notebook activity.
 
 ## 6. Gold merge rules
 

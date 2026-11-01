@@ -36,6 +36,7 @@ flowchart LR
 | Staging | Warehouse schema `Returns_Staging` | Tables `*_stg` | Overwritten each run with the month's facts and dimensions |
 | Gold | Warehouse schema `Returns_Gold` | Tables | Star schema, upserted |
 | Control | Warehouse schema `Returns_Control` | Tables | Watermark and run metadata |
+| Notebook audit | Lakehouse tables `audit_bronze_silver`, `audit_silver_gold` | Delta | One row per notebook run, one table per notebook (counts, status, duration) |
 
 ## Pipeline flow
 
@@ -113,7 +114,7 @@ The Copy activity reads the CSV (comma delimited, header row, quote and escape c
 
 1. Validates the `p_year` and `p_month` parameters.
 2. Reads the Bronze month. A missing or unreadable path raises an error. An empty month exits with 0 rows.
-3. Fills in any expected column that is missing from the source with NULL, and detects new unexpected columns (schema drift).
+3. Checks the structure of the file. A missing mandatory column or a new unexpected column (schema drift) raises an error that names the columns and fails the run before anything is loaded. Any other missing column is filled with NULL.
 4. Removes exact duplicate rows, cleans and types the data, and runs the row-level validation rules.
 5. Writes rejected rows to quarantine and merges valid rows into the Silver Delta table on `Order_Line_ID` (update matched, insert new). The first ever load creates the table partitioned by `Order_Year` and `Order_Month`.
 
@@ -153,6 +154,8 @@ The model uses natural business keys (no surrogate keys) and joins on those valu
 - `Insert_Pipeline_Metadata` runs whether the stages succeeded or failed, and derives the status: **Success**, **No Source File**, or **Failed**.
 - `If_Check_Error` then decides the outcome. It runs after the logging step **completes** (succeeded or failed), so an email is sent even if logging fails. On error it emails and fails the pipeline with the code `PIPELINE_STAGE_FAILED`, so the run shows as failed in Fabric Monitor. Otherwise it emails a success summary.
 - Row-level problems are not pipeline failures. They are quarantined and the run continues; the quarantined count is printed in the notebook output.
+- **Reject-rate limit.** If more than `p_max_reject_pct` (default 5) percent of a month's rows are quarantined, the notebook fails before loading (status `Rejected` in its audit table), so the failure email is sent and the watermark does not advance.
+- **Notebook audit table.** At the end of each run, `Bronze_Silver_Notebook_Optimised` and `Silver_Gold_Notebook_Optimised` each append one row to their own Lakehouse Delta table (`audit_bronze_silver` and `audit_silver_gold`): notebook, layer, year and month, status (`Success`, `No Data` or `Rejected`), start, end and duration, input, valid, quarantined and written row counts, rows inserted and updated (Bronze to Silver only), source, target and quarantine paths, list of missing (NULL-filled) columns, Spark application ID and, if the pipeline passes it as `p_run_id`, the pipeline run ID. Writing the audit row never fails a notebook, and a run that fails earlier is recorded by `Pipeline_Metadata` instead.
 - Pipeline and structural problems (missing Silver table, missing required Silver column, staging row-count mismatch, invalid parameters) raise errors and fail the stage.
 
 Email setup: [EMAIL_NOTIFICATIONS.md](EMAIL_NOTIFICATIONS.md).
