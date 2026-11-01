@@ -46,13 +46,14 @@ p_max_reject_pct="5"
 # |---|---|
 # | **Input** | `Files/bronze/ecommerce_returns/year=<p_year>/month=<p_month>/` (parquet) |
 # | **Output** | `Files/silver/ecommerce_returns/` (Delta, merged on `Order_Line_ID`) |
-# | **Quarantine** | `Files/quarantine/ecommerce_returns/bronze_silver/year=<p_year>month=<p_month>/` (Delta, rejected rows + reasons) |
-# | **Audit** | one row appended to the Lakehouse table `notebook_audit` |
+# | **Quarantine** | `Files/quarantine/ecommerce_returns/bronze_silver/year=<p_year>/month=<p_month>/` (Delta, rejected rows + reasons) |
+# | **Audit** | one row appended to the Lakehouse table `audit_bronze_silver` |
 # | **Exit value** | number of rows loaded into Silver (`"0"` when there is no bronze data) |
 # 
 # **Parameters** (first cell): `p_year`, `p_month`, `p_run_id` (`@pipeline().RunId` to link audit rows to the pipeline run).
 # 
-# **Flow:** validate parameters → read bronze → align schema → keep raw copy → clean → validate rows → de-duplicate keys → split valid / quarantine → merge into Silver → audit → exit.
+# **Flow:** validate parameters → read bronze → check schema (fail on missing mandatory or new columns; fill other missing columns with NULL) → keep raw copy → clean → validate rows → de-duplicate keys → split valid / quarantine → merge into Silver → audit → exit.
+
 
 # MARKDOWN ********************
 
@@ -61,7 +62,6 @@ p_max_reject_pct="5"
 # CELL ********************
 
 import re
-from functools import reduce
 from datetime import datetime, timezone
 
 from pyspark.sql.functions import *
@@ -345,6 +345,34 @@ def exit_if_empty(df):
 
 # CELL ********************
 
+def check_source_schema(df):
+    """Fail the run when the structure of the source file changed. All problems are reported together,
+    with the column names, in a single exception:
+    - a mandatory column is missing, or
+    - the file has a column that is neither expected nor already in Silver (schema drift).
+    Nothing is quarantined or loaded in that case; the pipeline sends the failure email.
+    Missing non-mandatory columns are allowed and are filled with NULL by add_missing_columns."""
+    problems = []
+
+    missing_mandatory = [c for c in MANDATORY_COLS if c not in df.columns]
+    if missing_mandatory:
+        problems.append(f"Mandatory column(s) missing from the source file: {missing_mandatory}")
+
+    expected = set(REFERENCED_COLS)
+    if DeltaTable.isDeltaTable(spark, targetFilePath):
+        expected |= set(spark.read.format("delta").load(targetFilePath).columns)
+
+    new_cols = [c for c in df.columns if c not in expected]
+    if new_cols:
+        problems.append(
+            f"Schema drift: new column(s) in the source file: {new_cols} "
+            f"(add them to REFERENCED_COLS and the Silver/Gold design before loading)"
+        )
+
+    if problems:
+        raise Exception(f"Source schema check failed for {sourceFilePath}. " + ". ".join(problems) + ".")
+
+
 def add_missing_columns(df):
     """Add expected columns that are absent from the source as NULL strings.
     Returns (df, missing_cols)."""
@@ -357,14 +385,9 @@ def add_missing_columns(df):
 
 
 def align_with_silver(df):
-    """Compare the source with the existing Silver table (if any).
-    - Silver columns absent from the source are added as NULL of the Silver type, so the merge lines up.
-    - Source columns unknown to Silver are reported as schema drift.
-    Returns (df, extra_cols)."""
-    extra_cols = []
+    """Silver columns absent from the source are added as NULL of the Silver type, so the merge lines up."""
     if DeltaTable.isDeltaTable(spark, targetFilePath):
         target_schema = spark.read.format("delta").load(targetFilePath).schema
-        target_names = [f.name for f in target_schema.fields]
 
         for f in target_schema.fields:
             if f.name in ("Order_Year", "Order_Month"):
@@ -372,12 +395,7 @@ def align_with_silver(df):
             if f.name not in df.columns:
                 df = df.withColumn(f.name, lit(None).cast(f.dataType))
                 print(f"WARNING: silver column '{f.name}' missing from source, filled with NULL")
-
-        extra_cols = [c for c in df.columns
-                      if c not in target_names and c not in REFERENCED_COLS]
-        if extra_cols:
-            print(f"WARNING: schema drift, new columns in source: {extra_cols}")
-    return df, extra_cols
+    return df
 
 
 def add_raw_copies(df):
@@ -465,7 +483,7 @@ def is_blank(raw_col):
     return col(raw_col).isNull() | (trim(col(raw_col)) == "")
 
 
-def build_checks(extra_cols):
+def build_checks():
     """Return the list of rule expressions, in the order their messages should appear."""
     checks = []
 
@@ -541,11 +559,6 @@ def build_checks(extra_cols):
         "Return_Flag is No but Return_Quantity is greater than 0"
     )
 
-    # --- Schema drift: a value in a column that is not in the Silver schema --------
-    if extra_cols:
-        drift_condition = reduce(lambda a, b: a | b, [~is_blank(f"_raw_{c}") for c in extra_cols])
-        check(drift_condition, f"Schema drift: value in unexpected column(s) {extra_cols}")
-
     return checks
 
 # METADATA ********************
@@ -599,9 +612,9 @@ def quarantine_duplicate_keys(df):
 
 # CELL ********************
 
-def split_valid_and_quarantine(df, original_cols, extra_cols):
+def split_valid_and_quarantine(df, original_cols):
     """Valid rows keep the cleaned Silver columns; quarantined rows keep the original raw values plus the reasons."""
-    valid_cols = [c for c in original_cols if c not in extra_cols] + ["Order_Year", "Order_Month"]
+    valid_cols = list(original_cols) + ["Order_Year", "Order_Month"]
 
     valid_df = df.filter(col("Validation_Errors").isNull()).select(*valid_cols)
 
@@ -713,8 +726,9 @@ df = read_bronze()
 exit_if_empty(df)
 df.printSchema()
 
+check_source_schema(df)                   # fails on missing mandatory columns or new (drifted) columns
 df, missing_cols = add_missing_columns(df)
-df, extra_cols = align_with_silver(df)
+df = align_with_silver(df)
 
 df = df.drop_duplicates()                 # exact duplicate rows (counts are taken once, after validation)
 df, original_cols = add_raw_copies(df)
@@ -735,7 +749,7 @@ df, original_cols = add_raw_copies(df)
 df = clean_data(df)
 df.printSchema()
 
-df = add_validation_errors(df, build_checks(extra_cols))
+df = add_validation_errors(df, build_checks())
 df = quarantine_duplicate_keys(df)
 
 df = df.persist(StorageLevel.MEMORY_AND_DISK)
@@ -753,7 +767,7 @@ df = df.persist(StorageLevel.MEMORY_AND_DISK)
 
 # CELL ********************
 
-valid_df, quarantine_df = split_valid_and_quarantine(df, original_cols, extra_cols)
+valid_df, quarantine_df = split_valid_and_quarantine(df, original_cols)
 input_count, valid_count, quarantine_count = count_rows(df)
 
 write_quarantine(quarantine_df, quarantine_count)
@@ -807,7 +821,6 @@ write_audit(
     source_path=sourceFilePath,
     target_path=targetFilePath,
     quarantine_path=quarantinePath,
-    schema_drift_columns=", ".join(extra_cols) if extra_cols else None,
     missing_source_columns=", ".join(missing_cols) if missing_cols else None,
 )
 

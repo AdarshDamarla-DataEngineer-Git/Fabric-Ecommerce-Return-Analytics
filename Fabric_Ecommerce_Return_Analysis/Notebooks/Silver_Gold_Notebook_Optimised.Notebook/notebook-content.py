@@ -46,7 +46,7 @@ p_max_reject_pct="5"
 # | **Input** | `Files/silver/ecommerce_returns/` (Delta), filtered to `Order_Year = p_year` and `Order_Month = p_month` |
 # | **Output** | `Ecommerce_Returns_Warehouse.Returns_Staging`: `Fact_Orders_stg`, `Dim_Product_stg`, `Dim_Customer_stg`, `Dim_Channel_stg`, `Dim_Return_Reason_stg`, `Dim_Payment_Method_stg` (overwritten every run) |
 # | **Quarantine** | `Files/quarantine/ecommerce_returns/silver_gold/year=<p_year>/month=<p_month>/` (Delta, rejected rows + reasons) |
-# | **Audit** | one row appended to the Lakehouse table `notebook_audit` |
+# | **Audit** | one row appended to the Lakehouse table `audit_silver_gold` |
 # | **Exit value** | number of rows written to `Fact_Orders_stg` |
 # 
 # **Parameters** (first cell): `p_year`, `p_month`, `p_run_id` (`@pipeline().RunId` to link audit rows to the pipeline run).
