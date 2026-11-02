@@ -16,6 +16,7 @@ Open the Warehouse **SQL query editor** and run each script, in this order:
 | `06_SP_Update_Watermark.sql` | Moves the watermark forward only | Yes (`CREATE OR ALTER`) |
 | `07_SP_Insert_Pipeline_Metadata.sql` | Writes one audit row per run | Yes (`CREATE OR ALTER`) |
 | `08_SP_Merge_Returns_Gold_Final.sql` | Merges staging into Gold in one transaction | Yes (`CREATE OR ALTER`) |
+| `10_Create_Dim_Date.sql` | Creates `Returns_Gold.Dim_Date` (one row per day, 2020-01-01 to 2035-12-31) for the Power BI semantic model. The pipeline never loads it | Yes, creates the table once and fills it only while empty |
 
 Utilities, run when needed:
 
@@ -26,6 +27,7 @@ Utilities, run when needed:
 
 ## Notes
 
+- Run `10_Create_Dim_Date.sql` after `04`, before the semantic model is first refreshed. `99_Reset_All_Tables.sql` leaves `Dim_Date` untouched.
 - Run `01` before anything else. Tables and procedures depend on the schemas existing.
 - The scripts do not touch the Lakehouse. Bronze, Silver and quarantine files stay as they are, even after `99_Reset_All_Tables.sql`.
 - If you use Fabric Git integration, the warehouse objects in the `Ecommerce_Returns_Warehouse.Warehouse` folder are the source of truth for the deployed warehouse. Keep these scripts in sync with them.
