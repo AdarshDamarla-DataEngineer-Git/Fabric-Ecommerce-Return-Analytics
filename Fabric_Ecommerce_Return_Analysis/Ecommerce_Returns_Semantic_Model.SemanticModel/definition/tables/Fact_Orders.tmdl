@@ -1,0 +1,223 @@
+table Fact_Orders
+	lineageTag: 540c8641-71f8-499d-98ab-36e6e8f7b8eb
+	sourceLineageTag: [Returns_Gold].[Fact_Orders]
+
+	column Order_Line_ID
+		dataType: string
+		lineageTag: 8590dcd7-3fbd-42f3-bfd5-fc6a24f46195
+		sourceLineageTag: Order_Line_ID
+		summarizeBy: none
+		sourceColumn: Order_Line_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order_ID
+		dataType: string
+		lineageTag: f5e7c00a-8058-468f-8e0b-93a20786ff67
+		sourceLineageTag: Order_ID
+		summarizeBy: none
+		sourceColumn: Order_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order_Date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 105df5f5-287a-4247-8b4e-c8fe51ce7044
+		sourceLineageTag: Order_Date
+		summarizeBy: none
+		sourceColumn: Order_Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer_ID
+		dataType: string
+		lineageTag: c8c7d8eb-948a-4a47-815d-0b1433cce637
+		sourceLineageTag: Customer_ID
+		summarizeBy: none
+		sourceColumn: Customer_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product_ID
+		dataType: string
+		lineageTag: 53f01db7-4e2f-4157-8362-9c305d0b121c
+		sourceLineageTag: Product_ID
+		summarizeBy: none
+		sourceColumn: Product_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sales_Channel
+		dataType: string
+		lineageTag: ed12432a-2c5b-40c0-aa3d-7eb1889c710f
+		sourceLineageTag: Sales_Channel
+		summarizeBy: none
+		sourceColumn: Sales_Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	column Payment_Method
+		dataType: string
+		lineageTag: 1df2fcb0-d0f9-4858-b484-abfb56291442
+		sourceLineageTag: Payment_Method
+		summarizeBy: none
+		sourceColumn: Payment_Method
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: cf451226-8446-4d08-81fc-ff639d29c947
+		sourceLineageTag: Quantity
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Unit_Price
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 7fb9b754-519f-4bef-817b-0c22f6120b43
+		sourceLineageTag: Unit_Price
+		summarizeBy: sum
+		sourceColumn: Unit_Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Unit_Cost
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 47a55202-2e8f-40ed-90ee-6de24ee47517
+		sourceLineageTag: Unit_Cost
+		summarizeBy: sum
+		sourceColumn: Unit_Cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Discount_Pct
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 8f72387e-6fdd-44e1-ba0b-99412442cccb
+		sourceLineageTag: Discount_Pct
+		summarizeBy: sum
+		sourceColumn: Discount_Pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Shipping_Fee
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: a924fe11-3f34-49a0-af68-3b1ccf94894f
+		sourceLineageTag: Shipping_Fee
+		summarizeBy: sum
+		sourceColumn: Shipping_Fee
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Delivery_Date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 991e06c2-2e1e-4cad-8767-c71b5eb44399
+		sourceLineageTag: Delivery_Date
+		summarizeBy: none
+		sourceColumn: Delivery_Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Return_Flag
+		dataType: string
+		lineageTag: 97ad68aa-08b6-4e0b-b256-bbca1c804f03
+		sourceLineageTag: Return_Flag
+		summarizeBy: none
+		sourceColumn: Return_Flag
+
+		annotation SummarizationSetBy = Automatic
+
+	column Return_Date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: e8c25734-c2b0-4fe3-aa72-ec80ae4f645f
+		sourceLineageTag: Return_Date
+		summarizeBy: none
+		sourceColumn: Return_Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column Return_Reason
+		dataType: string
+		lineageTag: 96a6b7b3-21d6-4338-bbf9-1b2482c773a0
+		sourceLineageTag: Return_Reason
+		summarizeBy: none
+		sourceColumn: Return_Reason
+
+		annotation SummarizationSetBy = Automatic
+
+	column Return_Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: b54276cb-1be3-433c-8682-7d8d0b7f724d
+		sourceLineageTag: Return_Quantity
+		summarizeBy: sum
+		sourceColumn: Return_Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Refund_Deduction_Pct
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 77d474c0-2d6d-4cfd-a6dc-2ad31e149e7c
+		sourceLineageTag: Refund_Deduction_Pct
+		summarizeBy: sum
+		sourceColumn: Refund_Deduction_Pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Product_Rating
+		dataType: int64
+		formatString: 0
+		lineageTag: ae032d43-11a7-4212-b2a1-7d48df5b8be5
+		sourceLineageTag: Product_Rating
+		summarizeBy: sum
+		sourceColumn: Product_Rating
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order_Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 1cf5da81-89e3-499a-81ff-c23b461cefc8
+		sourceLineageTag: Order_Year
+		summarizeBy: sum
+		sourceColumn: Order_Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Order_Month
+		dataType: int64
+		formatString: 0
+		lineageTag: 28a83c59-9f37-495f-a7db-63d72148809c
+		sourceLineageTag: Order_Month
+		summarizeBy: sum
+		sourceColumn: Order_Month
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Fact_Orders = entity
+		mode: directLake
+		source
+			entityName: Fact_Orders
+			schemaName: Returns_Gold
+			expressionSource: 'DirectLake - Ecommerce_Returns_Warehouse'
+

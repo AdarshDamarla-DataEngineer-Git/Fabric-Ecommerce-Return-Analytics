@@ -1,0 +1,56 @@
+table Dim_Product
+	lineageTag: b5a33153-57d3-44d0-9329-86fb1f4aa26b
+	sourceLineageTag: [Returns_Gold].[Dim_Product]
+
+	column Product_ID
+		dataType: string
+		lineageTag: 39b6a57b-b793-4a28-89ef-7ee8b40c3c24
+		sourceLineageTag: Product_ID
+		summarizeBy: none
+		sourceColumn: Product_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product_Name
+		dataType: string
+		lineageTag: 030aa112-97c1-43ae-98a4-28093d2e7b1b
+		sourceLineageTag: Product_Name
+		summarizeBy: none
+		sourceColumn: Product_Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 230a7902-8db9-4ce5-bd5e-808270234fa3
+		sourceLineageTag: Category
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subcategory
+		dataType: string
+		lineageTag: 6ad1e6a8-88ee-4e31-ac28-004ecae57e79
+		sourceLineageTag: Subcategory
+		summarizeBy: none
+		sourceColumn: Subcategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column Brand
+		dataType: string
+		lineageTag: 13c5e7e9-f054-4d40-aca4-b9d6edaf4eae
+		sourceLineageTag: Brand
+		summarizeBy: none
+		sourceColumn: Brand
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Product = entity
+		mode: directLake
+		source
+			entityName: Dim_Product
+			schemaName: Returns_Gold
+			expressionSource: 'DirectLake - Ecommerce_Returns_Warehouse'
+

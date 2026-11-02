@@ -1,0 +1,20 @@
+table Dim_Return_Reason
+	lineageTag: abb5d9aa-f15a-4e8c-82fd-6c449716391e
+	sourceLineageTag: [Returns_Gold].[Dim_Return_Reason]
+
+	column Return_Reason
+		dataType: string
+		lineageTag: 22f1a97a-c384-45dc-aad4-f0f6b76afe6c
+		sourceLineageTag: Return_Reason
+		summarizeBy: none
+		sourceColumn: Return_Reason
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Return_Reason = entity
+		mode: directLake
+		source
+			entityName: Dim_Return_Reason
+			schemaName: Returns_Gold
+			expressionSource: 'DirectLake - Ecommerce_Returns_Warehouse'
+

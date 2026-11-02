@@ -1,0 +1,20 @@
+table Dim_Payment_Method
+	lineageTag: 0655b6ff-b48f-4087-9c1a-493e5162e67d
+	sourceLineageTag: [Returns_Gold].[Dim_Payment_Method]
+
+	column Payment_Method
+		dataType: string
+		lineageTag: 076311aa-8f05-49b3-87aa-81b46a58ec13
+		sourceLineageTag: Payment_Method
+		summarizeBy: none
+		sourceColumn: Payment_Method
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Payment_Method = entity
+		mode: directLake
+		source
+			entityName: Dim_Payment_Method
+			schemaName: Returns_Gold
+			expressionSource: 'DirectLake - Ecommerce_Returns_Warehouse'
+

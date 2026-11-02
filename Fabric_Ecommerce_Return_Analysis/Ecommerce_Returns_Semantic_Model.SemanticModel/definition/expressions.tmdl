@@ -1,0 +1,11 @@
+expression 'DirectLake - Ecommerce_Returns_Warehouse' =
+		let
+		    Source = AzureStorage.DataLake("https://onelake.dfs.fabric.microsoft.com/06435289-d1b3-4645-b600-05705664d90b/f9f2dae4-b22a-4884-a3b8-0c9abc3305e3", [HierarchicalNavigation=true])
+		in
+		    Source
+	lineageTag: e3238175-7a6b-4a2f-a00e-f6c7c9ea8113
+
+	annotation PBI_IncludeFutureArtifacts = False
+
+	annotation PBI_RemovedChildren = [{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Control].[Pipeline_Watermark]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Control].[Pipeline_Metadata]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Staging].[Fact_Orders_stg]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Staging].[Dim_Return_Reason_stg]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Staging].[Dim_Channel_stg]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Staging].[Dim_Payment_Method_stg]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Staging].[Dim_Product_stg]"}},"objectType":"Table"},{"remoteItemId":{"analysisServicesObject":{"sourceName":null,"sourceLineageTag":"[Returns_Staging].[Dim_Customer_stg]"}},"objectType":"Table"}]
+
