@@ -1,0 +1,20 @@
+table Dim_Channel
+	lineageTag: 086c8ad5-0484-4e57-8f2a-6a15cad1572b
+	sourceLineageTag: [Returns_Gold].[Dim_Channel]
+
+	column Sales_Channel
+		dataType: string
+		lineageTag: a1127c7a-a3bd-40be-989e-854035774fab
+		sourceLineageTag: Sales_Channel
+		summarizeBy: none
+		sourceColumn: Sales_Channel
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Channel = entity
+		mode: directLake
+		source
+			entityName: Dim_Channel
+			schemaName: Returns_Gold
+			expressionSource: 'DirectLake - Ecommerce_Returns_Warehouse'
+

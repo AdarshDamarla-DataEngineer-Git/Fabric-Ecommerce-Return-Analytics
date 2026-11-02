@@ -28,7 +28,7 @@ Pipeline (If_Check_Error)
 - A Google account to send from.
 - Edit access to the pipeline in Fabric.
 - The pipeline already contains the `If_Check_Error` activity. Its **True** branch holds `Fail_Pipeline`, and its **False** branch is empty until you add the success email.
-- `If_Check_Error` should follow `Stored_Procedure_Insert_Metadata` on **Completed** (the blue arrow), so the email is still sent if the logging step itself fails.
+- `If_Check_Error` should follow `Set_Error_Stored_Procedure_Insert_Metadata` on **Succeeded** and **Skipped**. That activity records an error if the logging step `Stored_Procedure_Insert_Metadata` fails, so the email is still sent in that case.
 
 ## 2. Create the Apps Script
 
@@ -87,17 +87,35 @@ In the pipeline, open `If_Check_Error` and go into the **True** branch.
    | Connection | `Email_GoogleAppsScript_Webhook` |
    | Relative URL | empty |
    | Method | `POST` |
-   | Headers | `Content-Type` = `text/plain` |
+   | Headers | none needed (the script reads the raw body) |
    | Body | the expression below |
 
 3. Body (**Add dynamic content**):
 
    ```
-   @concat('Status: FAILED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processing: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Error: ', variables('error_message'))
+   @concat(
+       'Status: FAILED', decodeUriComponent('%0A'),
+       'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'),
+       'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'),
+       'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'),
+       'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'),
+       'Duration: ', string(div(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' min ', string(mod(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' sec', decodeUriComponent('%0A'),
+       'Processing: ', variables('watermark_year'), '-', variables('watermark_month_name'),
+       decodeUriComponent('%0A'), decodeUriComponent('%0A'),
+       'Completed before the failure:', decodeUriComponent('%0A'),
+       'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'),
+       'Silver records (valid): ', string(variables('silver_record_processed')), decodeUriComponent('%0A'),
+       'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')),
+       decodeUriComponent('%0A'), decodeUriComponent('%0A'),
+       'Error: ', variables('error_message'),
+       decodeUriComponent('%0A'), decodeUriComponent('%0A'),
+       'Run details: https://app.fabric.microsoft.com/workloads/data-pipeline/monitoring/workspaces/', pipeline().DataFactory,
+       '/pipelines/', pipeline().Pipeline, '/', pipeline().RunId
+   )
    ```
 
 4. Connect `Send_Failure_Email` to `Fail_Pipeline` with the **Completed** (blue) arrow, so the pipeline still fails with the real error even if the email could not be sent.
-5. Use the shortest timeout the Fabric portal allows (the minimum is 10 minutes) and 1 retry, so a problem with the script cannot hold the pipeline for long.
+5. Use a short timeout (the pipeline uses 15 minutes) and 1 retry, so a problem with the script cannot hold the pipeline for long.
 6. Save.
 
 `decodeUriComponent('%0A')` inserts a line break. The body is plain text, so no JSON escaping of the error message is needed.
@@ -106,19 +124,38 @@ In the pipeline, open `If_Check_Error` and go into the **True** branch.
 
 Open the **False** branch of `If_Check_Error` (it runs when no stage failed).
 
-1. Add a **Web** activity named `Send_Success_Email` with the same connection, empty relative URL, method `POST` and header `Content-Type` = `text/plain`.
+1. Add a **Web** activity named `Send_Success_Email` with the same connection, empty relative URL, method `POST` and no headers.
 2. Body (**Add dynamic content**):
 
    ```
-   @concat('Status: SUCCEEDED', decodeUriComponent('%0A'), 'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'), 'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'), 'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'), 'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'), 'Processed: ', variables('watermark_year'), '-', variables('watermark_month_name'), decodeUriComponent('%0A'), decodeUriComponent('%0A'), 'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'), 'Silver records: ', string(variables('silver_record_processed')), decodeUriComponent('%0A'), 'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')))
+   @concat(
+       'Status: SUCCEEDED', decodeUriComponent('%0A'),
+       'Pipeline: ', pipeline().PipelineName, decodeUriComponent('%0A'),
+       'Run ID: ', pipeline().RunId, decodeUriComponent('%0A'),
+       'Trigger: ', pipeline().TriggerType, decodeUriComponent('%0A'),
+       'Trigger time: ', pipeline().TriggerTime, decodeUriComponent('%0A'),
+       'Duration: ', string(div(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' min ', string(mod(div(sub(ticks(utcnow()), ticks(pipeline().TriggerTime)), 10000000), 60)), ' sec', decodeUriComponent('%0A'),
+       'Processed: ', variables('watermark_year'), '-', variables('watermark_month_name'),
+       decodeUriComponent('%0A'), decodeUriComponent('%0A'),
+       'Bronze records: ', string(variables('bronze_record_processed')), decodeUriComponent('%0A'),
+       'Silver records (valid): ', string(variables('silver_record_processed')), decodeUriComponent('%0A'),
+       'Gold fact (staging) records: ', string(variables('gold_fact_Stg_record_processed')), decodeUriComponent('%0A'),
+       'Rejected at Silver (Bronze - Silver): ', string(sub(int(variables('bronze_record_processed')), int(variables('silver_record_processed')))), ' (', <percentage of Bronze, one decimal>, '%)', decodeUriComponent('%0A'),
+       'Rejected at Gold (Silver - Gold staging): ', string(sub(int(variables('silver_record_processed')), int(variables('gold_fact_Stg_record_processed')))), ' (', <percentage of Silver, one decimal>, '%)',
+       decodeUriComponent('%0A'), decodeUriComponent('%0A'),
+       'Run details: https://app.fabric.microsoft.com/workloads/data-pipeline/monitoring/workspaces/', pipeline().DataFactory,
+       '/pipelines/', pipeline().Pipeline, '/', pipeline().RunId
+   )
    ```
+
+   The two percentages are computed in the pipeline with integer arithmetic (rounded to one decimal, and guarded against a zero denominator with `max(..., 1)`); copy the full expression from `Send_Success_Email` in `pipeline-content.json` rather than retyping it.
 
 3. Save.
 
 ## 6. Test
 
 - **Failure:** run the pipeline with `reprocess_year = 9999` and `reprocess_month = 1`. A stage fails and you should get `[FAILED] Ecommerce_Returns_Pipeline` with the error text. Clear the parameters afterwards.
-- **Success:** run the pipeline normally. You should get `[SUCCEEDED] Ecommerce_Returns_Pipeline` with the processed month and the Bronze, Silver and Gold-staging counts.
+- **Success:** run the pipeline normally. You should get `[SUCCEEDED] Ecommerce_Returns_Pipeline` with the processed month, the run duration, the Bronze, Silver and Gold-staging counts, the rows rejected at each stage and a link to the run in Fabric Monitor. The email is sent after the semantic model refresh, so it also confirms the report is up to date.
 
 Check spam the first time.
 
@@ -130,11 +167,16 @@ Pipeline: Ecommerce_Returns_Pipeline
 Run ID: <guid>
 Trigger: Manual
 Trigger time: 2026-10-27T18:02:11Z
+Duration: 6 min 12 sec
 Processed: 2025-March
 
 Bronze records: 296
-Silver records: 291
+Silver records (valid): 291
 Gold fact (staging) records: 291
+Rejected at Silver (Bronze - Silver): 5 (1.7%)
+Rejected at Gold (Silver - Gold staging): 0 (0.0%)
+
+Run details: https://app.fabric.microsoft.com/workloads/data-pipeline/monitoring/workspaces/<workspace-id>/pipelines/<pipeline-id>/<run-id>
 ```
 
 (The numbers above are illustrative.)
@@ -167,5 +209,5 @@ The labelled mail doubles as a run log (run IDs, counts, errors) that is easier 
 | Subject always says FAILED | The body does not start with a `Status:` line, or the script is still the old version. Deploy a new version. |
 | Email body shows `@concat(...)` text | The body was pasted as plain text. Re-enter it through **Add dynamic content** so it is saved as an expression. |
 | Pipeline fails with the email error instead of the real error | `Fail_Pipeline` is connected on **Succeeded** instead of **Completed**. Change the arrow. |
-| No success email even though the run worked | Check that the arrow from `Stored_Procedure_Insert_Metadata` into `If_Check_Error` is **Completed** (blue), not Succeeded. Then check the `Send_Success_Email` output in Fabric Monitor and **Apps Script → Executions**. |
-| Email is slow or the pipeline waits | The script is hanging. Fabric's minimum Web activity timeout is 10 minutes, so each attempt can wait that long. Keep retries at 1 and check **Apps Script → Executions**. |
+| No success email even though the run worked | Check that `If_Check_Error` depends on `Set_Error_Stored_Procedure_Insert_Metadata` for both **Succeeded** and **Skipped**. Then check the `Send_Success_Email` output in Fabric Monitor and **Apps Script → Executions**. |
+| Email is slow or the pipeline waits | The script is hanging. Each attempt can wait for the activity timeout (15 minutes in this pipeline). Keep retries at 1 and check **Apps Script → Executions**. |

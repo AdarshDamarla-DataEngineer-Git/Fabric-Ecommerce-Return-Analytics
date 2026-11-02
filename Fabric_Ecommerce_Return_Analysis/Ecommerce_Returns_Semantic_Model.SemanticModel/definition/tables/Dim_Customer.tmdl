@@ -1,0 +1,47 @@
+table Dim_Customer
+	lineageTag: 30994df8-06b9-4184-a2af-70a5214d065c
+	sourceLineageTag: [Returns_Gold].[Dim_Customer]
+
+	column Customer_ID
+		dataType: string
+		lineageTag: c4e664ab-fa4c-4135-b830-aea3128b8e77
+		sourceLineageTag: Customer_ID
+		summarizeBy: none
+		sourceColumn: Customer_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer_Segment
+		dataType: string
+		lineageTag: 4947fdef-efe2-4c79-b953-7dd0642e138f
+		sourceLineageTag: Customer_Segment
+		summarizeBy: none
+		sourceColumn: Customer_Segment
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer_City
+		dataType: string
+		lineageTag: 3cdad998-4740-4cf4-8ee3-e255d13a84de
+		sourceLineageTag: Customer_City
+		summarizeBy: none
+		sourceColumn: Customer_City
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer_State
+		dataType: string
+		lineageTag: bdbb1476-bc80-45b2-bb0a-703694e38100
+		sourceLineageTag: Customer_State
+		summarizeBy: none
+		sourceColumn: Customer_State
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Customer = entity
+		mode: directLake
+		source
+			entityName: Dim_Customer
+			schemaName: Returns_Gold
+			expressionSource: 'DirectLake - Ecommerce_Returns_Warehouse'
+

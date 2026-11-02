@@ -2,7 +2,7 @@
 
 This document lists every rule the pipeline applies to the returns data. Rules live in the two notebooks and the Warehouse stored procedures; this file is the plain-language reference.
 
-**Principle:** a row that breaks a rule is **quarantined**, not deleted and not allowed to stop the run. A row can break several rules at once and all reasons are recorded. Only structural problems (a missing file, missing mandatory or new columns in the source file, missing required Silver columns, invalid parameters, a staging count mismatch) fail the pipeline.
+**Principle:** a row that breaks a rule is **quarantined**, not deleted and not allowed to stop the run. A row can break several rules at once and all reasons are recorded. Only structural problems (a missing file, missing mandatory or new columns in the source file, missing required Silver columns, invalid parameters, a staging count mismatch), too many quarantined rows (section 5.1) or a failed downstream step such as the semantic model refresh fail the pipeline.
 
 ## Contents
 
@@ -26,7 +26,8 @@ This document lists every rule the pipeline applies to the returns data. Rules l
 | 1.5 | The watermark only moves forward, and only after the Gold merge succeeds. |
 | 1.6 | Source file missing for the month: the run is logged as **No Source File** and the watermark does not move. The pipeline still ends as failed and sends the failure email, so a scheduled run before the next file is published will alert. |
 | 1.7 | The pipeline runs one instance at a time. |
-| 1.8 | Notebook parameters: `p_year` must be four digits, `p_month` must be 1 to 12, otherwise the notebook raises an error. |
+| 1.8 | Notebook parameters: `p_year` must be four digits, `p_month` must be 1 to 12, otherwise the notebook raises an error. `p_max_reject_pct` must be a number from 0 to 100. `p_run_id` is optional and only links audit rows to the pipeline run. |
+| 1.9 | After the watermark is updated, the pipeline refreshes the Power BI semantic model. A refresh failure fails the run and sends the failure email, but Gold and the watermark are already updated and are not rolled back. |
 
 ## 2. Bronze to Silver: cleaning
 
@@ -44,7 +45,7 @@ Applied before validation, in this order.
 | 2.8 | **Return flag:** `Yes`, `Y`, `Returned` (any case) become `Yes`. Every other value becomes `No`. The original text is still checked in rule 3.9. |
 | 2.9 | `Order_Year` and `Order_Month` are derived from `Order_Date`. |
 | 2.10 | **Missing columns.** If a mandatory column (`Order_Line_ID`, `Order_ID`, `Order_Date`, `Customer_ID`, `Product_ID`, `Quantity`, `Unit_Price`, `Sales_Channel`, `Payment_Method`) is missing from the source file, the notebook **fails** before loading anything. Any other missing column is added as NULL, and so is a Silver column missing from the source. |
-| 2.11 | **Schema drift.** A source column that is neither expected (`REFERENCED_COLS`) nor already in Silver makes the notebook **fail** before loading anything, even if the column is empty. The error names the column(s). Add the column to the notebook's column list (and the Silver/Gold design) before loading that file. |
+| 2.11 | **Schema drift.** A source column that is neither expected (`REFERENCED_COLS`) nor already in Silver makes the notebook **fail** before loading anything, even if the column is empty. The error names the column(s). Add the column to the notebook's column list (and the Silver/Gold design) before loading that file. Demo files for 2.10 and 2.11: [SCHEMA_CHECK_DEMO.md](SCHEMA_CHECK_DEMO.md). |
 
 ## 3. Bronze to Silver: validation
 
@@ -149,6 +150,8 @@ After validation, each notebook computes `quarantined rows ÷ input rows × 100`
 
 All six merges run inside **one transaction**: if any of them fails, everything is rolled back, Gold stays exactly as it was, and the error is re-raised so the pipeline fails with the real message.
 
+`Dim_Date` is not part of this merge. It is a fixed calendar (2020-01-01 to 2035-12-31) created once by `Warehouse_Setup/10_Create_Dim_Date.sql`; order and return dates outside that range will not match a calendar row in the semantic model.
+
 Consequences: rerunning a month corrects existing rows and adds new ones without duplicating; dimension attributes (product, customer) always reflect the latest load; nothing is ever deleted from Gold by the pipeline.
 
 ## 7. Run status rules
@@ -159,7 +162,7 @@ Written to `Returns_Control.Pipeline_Metadata.Load_Status`:
 |---|---|
 | **Success** | `error_message` is empty. |
 | **No Source File** | The error message starts with `Source file not found`. |
-| **Failed** | Any other error message. |
+| **Failed** | Any other error message, including a failed semantic model refresh (`Ecommerce_Returns_Sematic_Model Failed: ...`). |
 
 The error text is stored up to 2,000 characters (longer messages are cut). Also recorded: row counts for Bronze (rows copied), Silver (valid rows merged), Gold staging (fact rows staged) and the Gold fact table total after the merge, plus start time, end time and duration in seconds. A run ID is logged only once, so a retried procedure does not create a duplicate row.
 

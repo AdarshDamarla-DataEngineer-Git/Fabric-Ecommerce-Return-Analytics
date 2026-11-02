@@ -682,6 +682,13 @@
               "Succeeded",
               "Skipped"
             ]
+          },
+          {
+            "activity": "Set_Error_Ecommerce_Returns_Sematic_Model",
+            "dependencyConditions": [
+              "Succeeded",
+              "Skipped"
+            ]
           }
         ]
       },
@@ -905,6 +912,61 @@
         "dependsOn": [
           {
             "activity": "Stored_Procedure_Insert_Metadata",
+            "dependencyConditions": [
+              "Failed"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "PBISemanticModelRefresh",
+        "typeProperties": {
+          "method": "POST",
+          "groupId": "06435289-d1b3-4645-b600-05705664d90b",
+          "datasetId": "546b35a8-bd24-42ca-9d50-ff68f83c04a1",
+          "commitMode": "Transactional",
+          "objects": [],
+          "waitOnCompletion": true,
+          "operationType": "SemanticModelRefresh",
+          "timeout": ""
+        },
+        "externalReferences": {
+          "connection": "43066272-6641-46b8-b44f-4cd67294b9bf"
+        },
+        "policy": {
+          "timeout": "0.00:20:00",
+          "retry": 1,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Ecommerce_Returns_Sematic_Model",
+        "dependsOn": [
+          {
+            "activity": "Stored_Procedure_Update_Watermark",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "SetVariable",
+        "typeProperties": {
+          "variableName": "error_message",
+          "value": {
+            "value": "@concat(\n    'Ecommerce_Returns_Sematic_Model Failed: ',\n    activity('Ecommerce_Returns_Sematic_Model').error.message\n    )",
+            "type": "Expression"
+          }
+        },
+        "policy": {
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Set_Error_Ecommerce_Returns_Sematic_Model",
+        "dependsOn": [
+          {
+            "activity": "Ecommerce_Returns_Sematic_Model",
             "dependencyConditions": [
               "Failed"
             ]

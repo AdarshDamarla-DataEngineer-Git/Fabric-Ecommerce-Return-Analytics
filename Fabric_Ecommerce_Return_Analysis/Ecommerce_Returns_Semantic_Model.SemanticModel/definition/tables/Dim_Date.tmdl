@@ -1,0 +1,52 @@
+table Dim_Date
+	lineageTag: 2172a32c-a257-5da3-cada-8c31988390d8
+	sourceLineageTag: [Returns_Gold].[Dim_Date]
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: dd-MMM-yyyy
+		lineageTag: 8f3262c9-15d3-38ca-d7e2-0aeaae02742c
+		sourceLineageTag: Date
+		summarizeBy: none
+		sourceColumn: Date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: ccace417-6ab4-0451-f992-9c86a341fa06
+		sourceLineageTag: Year
+		summarizeBy: none
+		sourceColumn: Year
+
+	column 'Month Number'
+		dataType: int64
+		formatString: 0
+		lineageTag: 8c96bca1-1c89-b6e2-40db-19ae9d02d28c
+		sourceLineageTag: Month_Number
+		summarizeBy: none
+		sourceColumn: Month_Number
+
+	column Month
+		dataType: string
+		lineageTag: e0ab4347-027e-ea24-3f55-fdc66c53fc12
+		sourceLineageTag: Month
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: 'Month Number'
+
+	column 'Year Month'
+		dataType: string
+		lineageTag: bf0337b9-df94-d834-ef79-ddd2790a333b
+		sourceLineageTag: Year_Month
+		summarizeBy: none
+		sourceColumn: Year_Month
+
+	partition Dim_Date = entity
+		mode: directLake
+		source
+			entityName: Dim_Date
+			schemaName: Returns_Gold
+			expressionSource: 'DirectLake - Ecommerce_Returns_Warehouse'
+

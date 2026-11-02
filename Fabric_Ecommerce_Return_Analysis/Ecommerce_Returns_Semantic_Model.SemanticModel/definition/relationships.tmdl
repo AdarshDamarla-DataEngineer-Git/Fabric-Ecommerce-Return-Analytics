@@ -1,0 +1,29 @@
+relationship f98c338f-997b-2f5f-48ff-0b8c813848e7
+	fromColumn: Fact_Orders.Customer_ID
+	toColumn: Dim_Customer.Customer_ID
+
+relationship f2102be9-4002-d983-344f-3bba4f0665b9
+	fromColumn: Fact_Orders.Product_ID
+	toColumn: Dim_Product.Product_ID
+
+relationship 5f8b5ec9-78cb-8888-8b2b-db9013180834
+	fromColumn: Fact_Orders.Sales_Channel
+	toColumn: Dim_Channel.Sales_Channel
+
+relationship dbf7ed32-cf92-44f0-ab19-1afdadd923d5
+	fromColumn: Fact_Orders.Payment_Method
+	toColumn: Dim_Payment_Method.Payment_Method
+
+relationship 6583ab9f-255d-1014-e573-7522c6a2934e
+	fromColumn: Fact_Orders.Return_Reason
+	toColumn: Dim_Return_Reason.Return_Reason
+
+relationship 7edadfdd-788c-c3c0-52c8-fa11c84c76ef
+	fromColumn: Fact_Orders.Order_Date
+	toColumn: Dim_Date.Date
+
+relationship d0891ac6-6ded-29af-56b1-cfd927a1a5db
+	isActive: false
+	fromColumn: Fact_Orders.Return_Date
+	toColumn: Dim_Date.Date
+
