@@ -20,9 +20,10 @@ relationship 6583ab9f-255d-1014-e573-7522c6a2934e
 
 relationship 7edadfdd-788c-c3c0-52c8-fa11c84c76ef
 	fromColumn: Fact_Orders.Order_Date
-	toColumn: Date.Date
+	toColumn: Dim_Date.Date
 
 relationship d0891ac6-6ded-29af-56b1-cfd927a1a5db
 	isActive: false
 	fromColumn: Fact_Orders.Return_Date
-	toColumn: Date.Date
+	toColumn: Dim_Date.Date
+

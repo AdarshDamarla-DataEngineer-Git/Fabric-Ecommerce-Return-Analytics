@@ -7,7 +7,7 @@ table Fact_Orders
 		displayFolder: Volume
 		lineageTag: 711b006a-c1f5-9edd-690c-549ccbd2efaa
 
-	measure 'Orders' = DISTINCTCOUNT(Fact_Orders[Order_ID])
+	measure Orders = DISTINCTCOUNT(Fact_Orders[Order_ID])
 		formatString: #,0
 		displayFolder: Volume
 		lineageTag: 98957d82-4f31-2293-1a9c-391f7cce5d97
@@ -17,7 +17,7 @@ table Fact_Orders
 		displayFolder: Volume
 		lineageTag: 9a594e65-d0b3-10d7-fd79-1805d272e6df
 
-	measure 'Customers' = DISTINCTCOUNT(Fact_Orders[Customer_ID])
+	measure Customers = DISTINCTCOUNT(Fact_Orders[Customer_ID])
 		formatString: #,0
 		displayFolder: Volume
 		lineageTag: b32712bf-8679-9f3b-ba65-b2667170e50e
@@ -47,7 +47,7 @@ table Fact_Orders
 		displayFolder: Sales
 		lineageTag: c69457a5-5f47-4ee3-4c1b-150cb725e5a3
 
-	measure 'Net Sales Previous Month' = CALCULATE([Net Sales], DATEADD('Date'[Date], -1, MONTH))
+	measure 'Net Sales Previous Month' = CALCULATE([Net Sales], DATEADD('Dim_Date'[Date], -1, MONTH))
 		formatString: "₹"#,0
 		displayFolder: Sales
 		lineageTag: 90cbcdd3-825f-e918-116f-beba3a8ad3e3
@@ -72,7 +72,7 @@ table Fact_Orders
 		displayFolder: Returns
 		lineageTag: 79c4e06c-b4bd-7633-a2e5-043ae21cfd8c
 
-	measure 'Refund Amount by Return Date' = CALCULATE([Refund Amount], USERELATIONSHIP('Date'[Date], Fact_Orders[Return_Date]))
+	measure 'Refund Amount by Return Date' = CALCULATE([Refund Amount], USERELATIONSHIP('Dim_Date'[Date], Fact_Orders[Return_Date]))
 		formatString: "₹"#,0
 		displayFolder: Returns
 		lineageTag: a8690f93-7ed5-3a2d-8c17-cda7e9ed56ef
@@ -156,8 +156,8 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Customer_ID
-		isHidden
 		dataType: string
+		isHidden
 		lineageTag: c8c7d8eb-948a-4a47-815d-0b1433cce637
 		sourceLineageTag: Customer_ID
 		summarizeBy: none
@@ -166,8 +166,8 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Product_ID
-		isHidden
 		dataType: string
+		isHidden
 		lineageTag: 53f01db7-4e2f-4157-8362-9c305d0b121c
 		sourceLineageTag: Product_ID
 		summarizeBy: none
@@ -176,8 +176,8 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Sales_Channel
-		isHidden
 		dataType: string
+		isHidden
 		lineageTag: ed12432a-2c5b-40c0-aa3d-7eb1889c710f
 		sourceLineageTag: Sales_Channel
 		summarizeBy: none
@@ -186,8 +186,8 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Payment_Method
-		isHidden
 		dataType: string
+		isHidden
 		lineageTag: 1df2fcb0-d0f9-4858-b484-abfb56291442
 		sourceLineageTag: Payment_Method
 		summarizeBy: none
@@ -283,8 +283,8 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Return_Reason
-		isHidden
 		dataType: string
+		isHidden
 		lineageTag: 96a6b7b3-21d6-4338-bbf9-1b2482c773a0
 		sourceLineageTag: Return_Reason
 		summarizeBy: none

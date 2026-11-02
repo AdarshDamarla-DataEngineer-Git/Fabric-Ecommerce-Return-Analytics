@@ -1,8 +1,8 @@
 model Model
 	culture: en-US
 	defaultPowerBIDataSourceVersion: powerBI_V3
-	sourceQueryCulture: en-US
 	discourageImplicitMeasures
+	sourceQueryCulture: en-US
 	dataAccessOptions
 		legacyRedirects
 		returnErrorValuesAsNull
@@ -13,11 +13,11 @@ annotation PBI_QueryOrder = ["DirectLake - Ecommerce_Returns_Warehouse"]
 
 annotation PBI_ProTooling = ["DirectLakeOnOneLakeInWeb"]
 
-ref table Date
 ref table Dim_Channel
 ref table Dim_Customer
 ref table Dim_Payment_Method
 ref table Dim_Product
 ref table Dim_Return_Reason
 ref table Fact_Orders
+ref table Dim_Date
 
