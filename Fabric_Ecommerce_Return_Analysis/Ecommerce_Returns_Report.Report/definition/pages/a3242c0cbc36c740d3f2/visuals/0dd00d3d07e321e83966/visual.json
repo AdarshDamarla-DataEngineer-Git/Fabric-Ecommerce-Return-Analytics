@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "0dd00d3d07e321e83966",
   "position": {
     "x": 330,
     "y": 12,
-    "width": 300,
+    "z": 1000,
     "height": 60,
-    "z": 1,
-    "tabOrder": 1
+    "width": 300,
+    "tabOrder": 1000
   },
   "visual": {
     "visualType": "slicer",
@@ -27,11 +27,59 @@
                 }
               },
               "queryRef": "Dim_Channel.Sales_Channel",
-              "nativeQueryRef": "Sales_Channel"
+              "nativeQueryRef": "Sales_Channel",
+              "active": true
             }
           ]
         }
       }
+    },
+    "objects": {
+      "general": [
+        {
+          "properties": {}
+        }
+      ],
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            },
+            "isInvertedSelectionMode": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "selection": [
+        {
+          "properties": {
+            "selectAllCheckboxEnabled": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "singleSelect": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
       "title": [
@@ -40,7 +88,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },

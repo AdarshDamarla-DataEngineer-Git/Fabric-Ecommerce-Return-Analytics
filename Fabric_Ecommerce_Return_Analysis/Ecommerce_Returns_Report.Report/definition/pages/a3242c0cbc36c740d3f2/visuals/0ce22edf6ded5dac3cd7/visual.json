@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "0ce22edf6ded5dac3cd7",
   "position": {
     "x": 20,
     "y": 190,
-    "width": 620,
+    "z": 10000,
     "height": 250,
-    "z": 10,
-    "tabOrder": 10
+    "width": 620,
+    "tabOrder": 10000
   },
   "visual": {
     "visualType": "lineChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Date.Year Month",
-              "nativeQueryRef": "Year Month"
+              "nativeQueryRef": "Year Month",
+              "active": true
             }
           ]
         },
@@ -97,6 +98,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Net Sales and Refund Amount by month'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "d27ef9bcf269715b66ad",
   "position": {
-    "x": 1035,
-    "y": 84,
-    "width": 195,
+    "x": 1064.6034816247582,
+    "y": 84.177949709864592,
+    "z": 9000,
     "height": 90,
-    "z": 9,
-    "tabOrder": 9
+    "width": 195,
+    "tabOrder": 9000
   },
   "visual": {
     "visualType": "card",
@@ -33,8 +33,63 @@
         }
       }
     },
+    "objects": {
+      "labels": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "21D"
+                }
+              }
+            },
+            "preserveWhitespace": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "categoryLabels": [
+        {
+          "properties": {
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
       "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Gross Margin %'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualHeader": [
         {
           "properties": {
             "show": {
@@ -43,11 +98,17 @@
                   "Value": "true"
                 }
               }
-            },
-            "text": {
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "bottom": {
               "expr": {
                 "Literal": {
-                  "Value": "'Gross Margin %'"
+                  "Value": "8D"
                 }
               }
             }

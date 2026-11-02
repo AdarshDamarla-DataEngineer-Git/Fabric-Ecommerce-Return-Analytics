@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "4c1f4b1139d24e0ac05a",
   "position": {
-    "x": 832,
-    "y": 84,
-    "width": 195,
+    "x": 841.829268292683,
+    "y": 84.512195121951223,
+    "z": 8000,
     "height": 90,
-    "z": 8,
-    "tabOrder": 8
+    "width": 195,
+    "tabOrder": 8000
   },
   "visual": {
     "visualType": "card",
@@ -33,6 +33,21 @@
         }
       }
     },
+    "objects": {
+      "categoryLabels": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
       "title": [
         {
@@ -40,7 +55,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -48,6 +63,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Avg Rating'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "11D"
                 }
               }
             }

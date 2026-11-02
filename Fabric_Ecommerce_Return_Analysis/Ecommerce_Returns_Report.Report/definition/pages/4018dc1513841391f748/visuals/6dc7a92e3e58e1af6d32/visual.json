@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "6dc7a92e3e58e1af6d32",
   "position": {
-    "x": 629,
-    "y": 84,
-    "width": 195,
+    "x": 630,
+    "y": 84.512195121951223,
+    "z": 7000,
     "height": 90,
-    "z": 7,
-    "tabOrder": 7
+    "width": 195,
+    "tabOrder": 7000
   },
   "visual": {
     "visualType": "card",
@@ -40,7 +40,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -48,6 +48,26 @@
               "expr": {
                 "Literal": {
                   "Value": "'Gross Margin %'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "11D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "11D"
                 }
               }
             }

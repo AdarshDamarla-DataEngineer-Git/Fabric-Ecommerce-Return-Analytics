@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "d8d6540e2364f45e4298",
   "position": {
     "x": 20,
     "y": 450,
-    "width": 620,
+    "z": 12000,
     "height": 260,
-    "z": 12,
-    "tabOrder": 12
+    "width": 620,
+    "tabOrder": 12000
   },
   "visual": {
     "visualType": "columnChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Channel.Sales_Channel",
-              "nativeQueryRef": "Sales_Channel"
+              "nativeQueryRef": "Sales_Channel",
+              "active": true
             }
           ]
         },
@@ -83,6 +84,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Net Sales by sales channel'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

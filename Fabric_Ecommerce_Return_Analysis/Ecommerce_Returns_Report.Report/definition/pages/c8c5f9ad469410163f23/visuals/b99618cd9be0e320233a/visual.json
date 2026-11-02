@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "b99618cd9be0e320233a",
   "position": {
     "x": 650,
     "y": 190,
-    "width": 610,
+    "z": 11000,
     "height": 250,
-    "z": 11,
-    "tabOrder": 11
+    "width": 610,
+    "tabOrder": 11000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Product.Category",
-              "nativeQueryRef": "Category"
+              "nativeQueryRef": "Category",
+              "active": true
             }
           ]
         },
@@ -83,6 +84,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Return rate by category'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

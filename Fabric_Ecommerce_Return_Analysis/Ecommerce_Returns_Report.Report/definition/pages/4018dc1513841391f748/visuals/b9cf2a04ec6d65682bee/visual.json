@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "b9cf2a04ec6d65682bee",
   "position": {
-    "x": 20,
-    "y": 190,
-    "width": 420,
-    "height": 520,
-    "z": 10,
-    "tabOrder": 10
+    "x": 19.756097560975611,
+    "y": 189.8780487804878,
+    "z": 10000,
+    "height": 251.34146341463415,
+    "width": 557.56097560975616,
+    "tabOrder": 10000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Customer.Customer_State",
-              "nativeQueryRef": "Customer_State"
+              "nativeQueryRef": "Customer_State",
+              "active": true
             }
           ]
         },
@@ -83,6 +84,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Net Sales by state'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

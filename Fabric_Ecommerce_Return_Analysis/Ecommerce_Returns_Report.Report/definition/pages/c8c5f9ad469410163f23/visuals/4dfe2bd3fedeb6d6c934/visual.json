@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "4dfe2bd3fedeb6d6c934",
   "position": {
     "x": 20,
     "y": 450,
-    "width": 620,
+    "z": 12000,
     "height": 260,
-    "z": 12,
-    "tabOrder": 12
+    "width": 620,
+    "tabOrder": 12000
   },
   "visual": {
     "visualType": "lineChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Date.Year Month",
-              "nativeQueryRef": "Year Month"
+              "nativeQueryRef": "Year Month",
+              "active": true
             }
           ]
         },
@@ -83,6 +84,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Return rate by month'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

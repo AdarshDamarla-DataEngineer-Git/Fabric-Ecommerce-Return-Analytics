@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "f4e350948fc6fca63f05",
   "position": {
     "x": 650,
     "y": 450,
-    "width": 610,
+    "z": 13000,
     "height": 260,
-    "z": 13,
-    "tabOrder": 13
+    "width": 610,
+    "tabOrder": 13000
   },
   "visual": {
     "visualType": "columnChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Channel.Sales_Channel",
-              "nativeQueryRef": "Sales_Channel"
+              "nativeQueryRef": "Sales_Channel",
+              "active": true
             }
           ]
         },
@@ -83,6 +84,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Return rate by sales channel'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

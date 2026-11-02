@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "a90af23c0fd20d044def",
   "position": {
     "x": 650,
     "y": 450,
-    "width": 610,
+    "z": 13000,
     "height": 260,
-    "z": 13,
-    "tabOrder": 13
+    "width": 610,
+    "tabOrder": 13000
   },
   "visual": {
     "visualType": "donutChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Payment_Method.Payment_Method",
-              "nativeQueryRef": "Payment_Method"
+              "nativeQueryRef": "Payment_Method",
+              "active": true
             }
           ]
         },
@@ -66,6 +67,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Net Sales by payment method'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }

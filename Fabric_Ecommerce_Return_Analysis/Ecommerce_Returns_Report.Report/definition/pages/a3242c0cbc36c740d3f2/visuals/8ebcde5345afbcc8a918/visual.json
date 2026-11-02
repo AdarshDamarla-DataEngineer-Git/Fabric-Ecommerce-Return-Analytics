@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "8ebcde5345afbcc8a918",
   "position": {
-    "x": 950,
-    "y": 12,
-    "width": 300,
-    "height": 60,
-    "z": 3,
-    "tabOrder": 3
+    "x": 950.48780487804879,
+    "y": 12.073170731707318,
+    "z": 3000,
+    "height": 60.365853658536587,
+    "width": 298.53658536585368,
+    "tabOrder": 3000
   },
   "visual": {
     "visualType": "slicer",
@@ -27,11 +27,59 @@
                 }
               },
               "queryRef": "Dim_Payment_Method.Payment_Method",
-              "nativeQueryRef": "Payment_Method"
+              "nativeQueryRef": "Payment_Method",
+              "active": true
             }
           ]
         }
       }
+    },
+    "objects": {
+      "general": [
+        {
+          "properties": {}
+        }
+      ],
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            },
+            "isInvertedSelectionMode": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "selection": [
+        {
+          "properties": {
+            "selectAllCheckboxEnabled": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "singleSelect": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
       "title": [
@@ -40,7 +88,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },

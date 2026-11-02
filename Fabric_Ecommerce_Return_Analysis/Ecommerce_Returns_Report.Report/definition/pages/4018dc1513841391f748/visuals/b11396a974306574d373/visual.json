@@ -1,13 +1,13 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
   "name": "b11396a974306574d373",
   "position": {
-    "x": 450,
-    "y": 190,
-    "width": 350,
-    "height": 520,
-    "z": 11,
-    "tabOrder": 11
+    "x": 19.756097560975611,
+    "y": 450,
+    "z": 11000,
+    "height": 251.34146341463415,
+    "width": 557.56097560975616,
+    "tabOrder": 11000
   },
   "visual": {
     "visualType": "clusteredBarChart",
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "Dim_Customer.Customer_Segment",
-              "nativeQueryRef": "Customer_Segment"
+              "nativeQueryRef": "Customer_Segment",
+              "active": true
             }
           ]
         },
@@ -83,6 +84,19 @@
               "expr": {
                 "Literal": {
                   "Value": "'Net Sales by customer segment'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }
