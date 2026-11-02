@@ -2,6 +2,131 @@ table Fact_Orders
 	lineageTag: 540c8641-71f8-499d-98ab-36e6e8f7b8eb
 	sourceLineageTag: [Returns_Gold].[Fact_Orders]
 
+	measure 'Order Lines' = COUNTROWS(Fact_Orders)
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 711b006a-c1f5-9edd-690c-549ccbd2efaa
+
+	measure 'Orders' = DISTINCTCOUNT(Fact_Orders[Order_ID])
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 98957d82-4f31-2293-1a9c-391f7cce5d97
+
+	measure 'Units Sold' = SUM(Fact_Orders[Quantity])
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: 9a594e65-d0b3-10d7-fd79-1805d272e6df
+
+	measure 'Customers' = DISTINCTCOUNT(Fact_Orders[Customer_ID])
+		formatString: #,0
+		displayFolder: Volume
+		lineageTag: b32712bf-8679-9f3b-ba65-b2667170e50e
+
+	measure 'Gross Sales' = SUMX(Fact_Orders, Fact_Orders[Quantity] * Fact_Orders[Unit_Price])
+		formatString: "₹"#,0
+		displayFolder: Sales
+		lineageTag: 9cf1ee91-fe2d-f57c-fc8b-44575decb198
+
+	measure 'Discount Amount' = SUMX(Fact_Orders, Fact_Orders[Quantity] * Fact_Orders[Unit_Price] * Fact_Orders[Discount_Pct] / 100)
+		formatString: "₹"#,0
+		displayFolder: Sales
+		lineageTag: 1bab1708-9c95-927c-6d71-70db9ccfdd70
+
+	measure 'Net Sales' = [Gross Sales] - [Discount Amount]
+		formatString: "₹"#,0
+		displayFolder: Sales
+		lineageTag: 30085924-8430-a931-a1dd-9d2b10e410f1
+
+	measure 'Shipping Fees' = SUM(Fact_Orders[Shipping_Fee])
+		formatString: "₹"#,0
+		displayFolder: Sales
+		lineageTag: 1ee768f0-58d4-fc71-ee52-34795671d8dd
+
+	measure 'Avg Order Value' = DIVIDE([Net Sales], [Orders])
+		formatString: "₹"#,0.00
+		displayFolder: Sales
+		lineageTag: c69457a5-5f47-4ee3-4c1b-150cb725e5a3
+
+	measure 'Net Sales Previous Month' = CALCULATE([Net Sales], DATEADD('Date'[Date], -1, MONTH))
+		formatString: "₹"#,0
+		displayFolder: Sales
+		lineageTag: 90cbcdd3-825f-e918-116f-beba3a8ad3e3
+
+	measure 'Net Sales MoM %' = DIVIDE([Net Sales] - [Net Sales Previous Month], [Net Sales Previous Month])
+		formatString: 0.0%
+		displayFolder: Sales
+		lineageTag: ee60d2d2-ef13-39b5-729a-793d4cb0a96f
+
+	measure 'Returned Lines' = CALCULATE(COUNTROWS(Fact_Orders), Fact_Orders[Return_Flag] = "Yes")
+		formatString: #,0
+		displayFolder: Returns
+		lineageTag: 2fa105e7-25d7-e0b7-7902-55aa4f352d5e
+
+	measure 'Returned Units' = SUM(Fact_Orders[Return_Quantity])
+		formatString: #,0
+		displayFolder: Returns
+		lineageTag: e3866f3d-cf8b-0958-8bd6-c49b6ef69a1c
+
+	measure 'Refund Amount' = SUMX(Fact_Orders, Fact_Orders[Return_Quantity] * Fact_Orders[Unit_Price] * (1 - Fact_Orders[Discount_Pct] / 100) * (1 - Fact_Orders[Refund_Deduction_Pct] / 100))
+		formatString: "₹"#,0
+		displayFolder: Returns
+		lineageTag: 79c4e06c-b4bd-7633-a2e5-043ae21cfd8c
+
+	measure 'Refund Amount by Return Date' = CALCULATE([Refund Amount], USERELATIONSHIP('Date'[Date], Fact_Orders[Return_Date]))
+		formatString: "₹"#,0
+		displayFolder: Returns
+		lineageTag: a8690f93-7ed5-3a2d-8c17-cda7e9ed56ef
+
+	measure 'Return Rate (Lines)' = DIVIDE([Returned Lines], [Order Lines])
+		formatString: 0.0%
+		displayFolder: Returns
+		lineageTag: 29345d0d-25bd-3816-bd38-3820064520f9
+
+	measure 'Return Rate (Units)' = DIVIDE([Returned Units], [Units Sold])
+		formatString: 0.0%
+		displayFolder: Returns
+		lineageTag: de8af4a6-c717-7f76-74c6-83dede0b6dae
+
+	measure 'Refund % of Net Sales' = DIVIDE([Refund Amount], [Net Sales])
+		formatString: 0.0%
+		displayFolder: Returns
+		lineageTag: a92c35e3-2c34-4c5a-3260-404a1182e35e
+
+	measure 'Avg Days to Return' = AVERAGEX(FILTER(Fact_Orders, NOT ISBLANK(Fact_Orders[Return_Date])), DATEDIFF(Fact_Orders[Order_Date], Fact_Orders[Return_Date], DAY))
+		formatString: 0.0
+		displayFolder: Returns
+		lineageTag: c4dc52ea-cc6e-9dfc-e879-a2537e0b6c7f
+
+	measure 'Net Sales After Returns' = [Net Sales] - [Refund Amount]
+		formatString: "₹"#,0
+		displayFolder: Profit
+		lineageTag: 87354c23-79e6-32a9-14d0-13552d6e986e
+
+	measure 'Cost of Kept Units' = SUMX(Fact_Orders, (Fact_Orders[Quantity] - COALESCE(Fact_Orders[Return_Quantity], 0)) * Fact_Orders[Unit_Cost])
+		formatString: "₹"#,0
+		displayFolder: Profit
+		lineageTag: 9a8462e4-685f-975d-7ef0-6e7cb7b0feeb
+
+	measure 'Gross Profit' = [Net Sales After Returns] - [Cost of Kept Units]
+		formatString: "₹"#,0
+		displayFolder: Profit
+		lineageTag: 8676cf05-2756-bc76-4687-261a9250e37a
+
+	measure 'Gross Margin %' = DIVIDE([Gross Profit], [Net Sales After Returns])
+		formatString: 0.0%
+		displayFolder: Profit
+		lineageTag: 6decfedf-d309-bd37-11d1-91b254f440f2
+
+	measure 'Avg Rating' = AVERAGE(Fact_Orders[Product_Rating])
+		formatString: 0.00
+		displayFolder: Service
+		lineageTag: 1e306aed-7ba3-5f08-7651-f3fb6a7dd469
+
+	measure 'Avg Days to Deliver' = AVERAGEX(FILTER(Fact_Orders, NOT ISBLANK(Fact_Orders[Delivery_Date])), DATEDIFF(Fact_Orders[Order_Date], Fact_Orders[Delivery_Date], DAY))
+		formatString: 0.0
+		displayFolder: Service
+		lineageTag: 52ef4149-789d-273c-3feb-3c855997d9fe
+
 	column Order_Line_ID
 		dataType: string
 		lineageTag: 8590dcd7-3fbd-42f3-bfd5-fc6a24f46195
@@ -22,7 +147,7 @@ table Fact_Orders
 
 	column Order_Date
 		dataType: dateTime
-		formatString: General Date
+		formatString: dd-MMM-yyyy
 		lineageTag: 105df5f5-287a-4247-8b4e-c8fe51ce7044
 		sourceLineageTag: Order_Date
 		summarizeBy: none
@@ -31,6 +156,7 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Customer_ID
+		isHidden
 		dataType: string
 		lineageTag: c8c7d8eb-948a-4a47-815d-0b1433cce637
 		sourceLineageTag: Customer_ID
@@ -40,6 +166,7 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Product_ID
+		isHidden
 		dataType: string
 		lineageTag: 53f01db7-4e2f-4157-8362-9c305d0b121c
 		sourceLineageTag: Product_ID
@@ -49,6 +176,7 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Sales_Channel
+		isHidden
 		dataType: string
 		lineageTag: ed12432a-2c5b-40c0-aa3d-7eb1889c710f
 		sourceLineageTag: Sales_Channel
@@ -58,6 +186,7 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Payment_Method
+		isHidden
 		dataType: string
 		lineageTag: 1df2fcb0-d0f9-4858-b484-abfb56291442
 		sourceLineageTag: Payment_Method
@@ -78,7 +207,7 @@ table Fact_Orders
 
 	column Unit_Price
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: "₹"#,0.00
 		lineageTag: 7fb9b754-519f-4bef-817b-0c22f6120b43
 		sourceLineageTag: Unit_Price
 		summarizeBy: sum
@@ -90,7 +219,7 @@ table Fact_Orders
 
 	column Unit_Cost
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: "₹"#,0.00
 		lineageTag: 47a55202-2e8f-40ed-90ee-6de24ee47517
 		sourceLineageTag: Unit_Cost
 		summarizeBy: sum
@@ -102,7 +231,7 @@ table Fact_Orders
 
 	column Discount_Pct
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: 0.00
 		lineageTag: 8f72387e-6fdd-44e1-ba0b-99412442cccb
 		sourceLineageTag: Discount_Pct
 		summarizeBy: sum
@@ -114,7 +243,7 @@ table Fact_Orders
 
 	column Shipping_Fee
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: "₹"#,0.00
 		lineageTag: a924fe11-3f34-49a0-af68-3b1ccf94894f
 		sourceLineageTag: Shipping_Fee
 		summarizeBy: sum
@@ -126,7 +255,7 @@ table Fact_Orders
 
 	column Delivery_Date
 		dataType: dateTime
-		formatString: General Date
+		formatString: dd-MMM-yyyy
 		lineageTag: 991e06c2-2e1e-4cad-8767-c71b5eb44399
 		sourceLineageTag: Delivery_Date
 		summarizeBy: none
@@ -145,7 +274,7 @@ table Fact_Orders
 
 	column Return_Date
 		dataType: dateTime
-		formatString: General Date
+		formatString: dd-MMM-yyyy
 		lineageTag: e8c25734-c2b0-4fe3-aa72-ec80ae4f645f
 		sourceLineageTag: Return_Date
 		summarizeBy: none
@@ -154,6 +283,7 @@ table Fact_Orders
 		annotation SummarizationSetBy = Automatic
 
 	column Return_Reason
+		isHidden
 		dataType: string
 		lineageTag: 96a6b7b3-21d6-4338-bbf9-1b2482c773a0
 		sourceLineageTag: Return_Reason
@@ -174,7 +304,7 @@ table Fact_Orders
 
 	column Refund_Deduction_Pct
 		dataType: decimal
-		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		formatString: 0.00
 		lineageTag: 77d474c0-2d6d-4cfd-a6dc-2ad31e149e7c
 		sourceLineageTag: Refund_Deduction_Pct
 		summarizeBy: sum
