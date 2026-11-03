@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "7f3a1c9e5b2d48a6c001",
   "position": {
     "x": 0,
@@ -23,20 +23,34 @@
                     "textStyle": {
                       "fontWeight": "bold",
                       "fontSize": "22pt",
-                      "color": "#FFFFFF"
+                      "color": "#ffffff"
                     }
                   },
                   {
                     "value": "   |   Overview",
                     "textStyle": {
                       "fontSize": "14pt",
-                      "color": "#CFE5FB"
+                      "color": "#cfe5fb"
                     }
                   }
-                ],
-                "horizontalTextAlignment": "Left"
+                ]
               }
             ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "padding": [
+        {
+          "properties": {
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "20D"
+                }
+              }
+            }
           }
         }
       ]
