@@ -129,7 +129,7 @@ erDiagram
 | Stored procedure | `Returns_Control.Update_Watermark` | Moves the watermark forward only |
 | Stored procedure | `Returns_Control.Insert_Pipeline_Metadata` | Writes the run log |
 | Semantic model | `Ecommerce_Returns_Semantic_Model` | Direct Lake model on the Gold schema, with relationships and DAX measures; refreshed by the pipeline |
-| Report | `Ecommerce_Returns_Report` | Three-page Power BI report on the semantic model |
+| Report | `Ecommerce_Returns_Report` | Three-page Power BI report (new card visuals, custom blue theme) on the semantic model |
 | Connection | HTTP (GitHub raw) | Source of the monthly files |
 | Connection | Web v2 (Apps Script) | Sends the email |
 | Connection | Power BI semantic model | Lets the pipeline refresh the semantic model |

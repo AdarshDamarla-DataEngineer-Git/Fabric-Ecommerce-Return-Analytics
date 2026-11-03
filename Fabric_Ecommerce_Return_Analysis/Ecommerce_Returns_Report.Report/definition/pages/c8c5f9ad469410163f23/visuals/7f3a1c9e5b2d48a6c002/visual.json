@@ -1,0 +1,60 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "7f3a1c9e5b2d48a6c002",
+  "position": {
+    "x": 0,
+    "y": 0,
+    "z": 14000,
+    "height": 52,
+    "width": 1280,
+    "tabOrder": 14000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "E-Commerce Returns & Refund Analytics",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontSize": "22pt",
+                      "color": "#ffffff"
+                    }
+                  },
+                  {
+                    "value": "   |   Returns analysis",
+                    "textStyle": {
+                      "fontSize": "14pt",
+                      "color": "#cfe5fb"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "padding": [
+        {
+          "properties": {
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "20D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

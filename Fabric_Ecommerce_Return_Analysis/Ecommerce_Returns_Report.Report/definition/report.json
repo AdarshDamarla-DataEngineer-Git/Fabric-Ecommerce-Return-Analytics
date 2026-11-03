@@ -1,5 +1,5 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.3.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.4.0/schema.json",
   "themeCollection": {
     "baseTheme": {
       "name": "Fluent2-CY26SU11",
@@ -9,6 +9,15 @@
         "page": "2.3.1"
       },
       "type": "SharedResources"
+    },
+    "customTheme": {
+      "name": "Retail_Blue_Theme.json",
+      "reportVersionAtImport": {
+        "visual": "2.13.0",
+        "report": "3.4.0",
+        "page": "2.3.1"
+      },
+      "type": "RegisteredResources"
     }
   },
   "objects": {
@@ -49,6 +58,17 @@
           "name": "Fluent2-CY26SU11",
           "path": "BaseThemes/Fluent2-CY26SU11.json",
           "type": "BaseTheme"
+        }
+      ]
+    },
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "Retail_Blue_Theme.json",
+          "path": "Retail_Blue_Theme.json",
+          "type": "CustomTheme"
         }
       ]
     }

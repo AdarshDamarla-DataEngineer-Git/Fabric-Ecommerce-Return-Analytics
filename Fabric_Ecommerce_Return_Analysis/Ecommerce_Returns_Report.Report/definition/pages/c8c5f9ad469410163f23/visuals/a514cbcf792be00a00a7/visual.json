@@ -1,19 +1,19 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "a514cbcf792be00a00a7",
   "position": {
     "x": 20,
-    "y": 84,
+    "y": 134,
     "z": 4000,
     "height": 90,
-    "width": 195,
+    "width": 1240,
     "tabOrder": 4000
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "cardVisual",
     "query": {
       "queryState": {
-        "Values": {
+        "Data": {
           "projections": [
             {
               "field": {
@@ -28,10 +28,143 @@
               },
               "queryRef": "Fact_Orders.Returned Lines",
               "nativeQueryRef": "Returned Lines"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Returned Units"
+                }
+              },
+              "queryRef": "Fact_Orders.Returned Units",
+              "nativeQueryRef": "Returned Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Return Rate (Units)"
+                }
+              },
+              "queryRef": "Fact_Orders.Return Rate (Units)",
+              "nativeQueryRef": "Return Rate (Units)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Refund Amount"
+                }
+              },
+              "queryRef": "Fact_Orders.Refund Amount",
+              "nativeQueryRef": "Refund Amount"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Refund % of Net Sales"
+                }
+              },
+              "queryRef": "Fact_Orders.Refund % of Net Sales",
+              "nativeQueryRef": "Refund % of Net Sales"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Avg Days to Return"
+                }
+              },
+              "queryRef": "Fact_Orders.Avg Days to Return",
+              "nativeQueryRef": "Avg Days to Return"
             }
           ]
         }
       }
+    },
+    "objects": {
+      "accentBar": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "fillCustom": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "divider": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ],
+      "outline": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          },
+          "selector": {
+            "id": "default"
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
       "title": [

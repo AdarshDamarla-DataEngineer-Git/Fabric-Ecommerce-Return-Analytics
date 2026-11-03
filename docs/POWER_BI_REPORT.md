@@ -19,12 +19,12 @@ Reference for `Ecommerce_Returns_Report`, the Power BI report on top of the [sem
 |---|---|
 | Name | `Ecommerce_Returns_Report` |
 | Data | `Ecommerce_Returns_Semantic_Model` (Direct Lake), bound by relative path |
-| Pages | 3, each 1280 x 720, fit to page |
-| Layout | 4 slicers in a top row, 6 KPI cards, then charts |
-| Theme | Fluent 2 base theme |
+| Pages | 3, each 1280 x 770, fit to page |
+| Layout | Title band, 4 slicers, one KPI card (the new card visual holding six measures), then charts |
+| Theme | Custom blue theme `Retail Blue` (on the Fluent 2 base theme): blue title band, light blue canvas, white bordered tiles, blue data colours with one yellow accent |
 | Freshness | The pipeline refreshes the model at the end of every run, so the report shows the latest loaded month |
 
-Every page uses the same top rows (filters, then six cards), so a reader can move between pages without relearning the layout.
+Every page opens with a title bar (`E-Commerce Returns & Refund Analytics | <page name>`, a text box). Below it every page uses the same rows (filters, then one card visual with six KPIs), so a reader can move between pages without relearning the layout.
 
 ## 2. Shared filters
 
@@ -111,11 +111,12 @@ The report is stored in PBIR format under `Fabric_Ecommerce_Return_Analysis/Ecom
 | File | Content |
 |---|---|
 | `definition.pbir` | Report definition and the link to the semantic model (`../Ecommerce_Returns_Semantic_Model.SemanticModel`) |
-| `definition/report.json` | Report-level settings and theme |
+| `definition/report.json` | Report-level settings and theme registration |
 | `definition/pages/pages.json` | Page order (Overview, Returns analysis, Customers and products) |
 | `definition/pages/<page id>/page.json` | One page: name and size |
 | `definition/pages/<page id>/visuals/<visual id>/visual.json` | One visual: type, position, fields and formatting |
-| `StaticResources/` | Base theme files |
+| `StaticResources/SharedResources/` | Base theme files |
+| `StaticResources/RegisteredResources/Retail_Blue_Theme.json` | The custom blue theme: colour palette, tile and title styling, card, slicer, chart axis and table styles |
 
 Each visual is its own small file, so a change to one chart shows up as a small, readable diff in Git.
 
@@ -123,6 +124,7 @@ Each visual is its own small file, so a change to one chart shows up as a small,
 
 - **Edit** in the Fabric workspace (the report editor) or open the PBIR folder in Power BI Desktop developer mode. Commit through Git integration.
 - **New visuals** should use the measures, not raw columns. Implicit measures are discouraged in the model, and the foreign-key columns on `Fact_Orders` are hidden.
+- **Change the look** in the theme file (or **View > Themes** in the editor) rather than formatting visuals one by one. Visuals carry no hard-coded colours, so a theme change restyles the whole report.
 - **Add a page** by copying an existing one so the slicer row and card row line up.
 - **Rebinding:** `definition.pbir` points to the model by relative path. Keep the report and the model in the same parent folder, or update that path.
 - **Sharing:** viewers need access to the workspace (or an app built from it) and read access to the semantic model. Because the model uses Direct Lake, they also need permission on the underlying warehouse data unless the model is set to a fixed identity.
