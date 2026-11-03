@@ -6,7 +6,7 @@
     "y": 134,
     "z": 4000,
     "height": 90,
-    "width": 195,
+    "width": 1240,
     "tabOrder": 4000
   },
   "visual": {
@@ -28,6 +28,76 @@
               },
               "queryRef": "Fact_Orders.Returned Lines",
               "nativeQueryRef": "Returned Lines"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Returned Units"
+                }
+              },
+              "queryRef": "Fact_Orders.Returned Units",
+              "nativeQueryRef": "Returned Units"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Return Rate (Units)"
+                }
+              },
+              "queryRef": "Fact_Orders.Return Rate (Units)",
+              "nativeQueryRef": "Return Rate (Units)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Refund Amount"
+                }
+              },
+              "queryRef": "Fact_Orders.Refund Amount",
+              "nativeQueryRef": "Refund Amount"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Refund % of Net Sales"
+                }
+              },
+              "queryRef": "Fact_Orders.Refund % of Net Sales",
+              "nativeQueryRef": "Refund % of Net Sales"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Fact_Orders"
+                    }
+                  },
+                  "Property": "Avg Days to Return"
+                }
+              },
+              "queryRef": "Fact_Orders.Avg Days to Return",
+              "nativeQueryRef": "Avg Days to Return"
             }
           ]
         }

@@ -20,11 +20,11 @@ Reference for `Ecommerce_Returns_Report`, the Power BI report on top of the [sem
 | Name | `Ecommerce_Returns_Report` |
 | Data | `Ecommerce_Returns_Semantic_Model` (Direct Lake), bound by relative path |
 | Pages | 3, each 1280 x 770, fit to page |
-| Layout | Title band, 4 slicers, 6 KPI cards (the new card visual), then charts |
+| Layout | Title band, 4 slicers, one KPI card (the new card visual holding six measures), then charts |
 | Theme | Custom blue theme `Retail Blue` (on the Fluent 2 base theme): blue title band, light blue canvas, white bordered tiles, blue data colours with one yellow accent |
 | Freshness | The pipeline refreshes the model at the end of every run, so the report shows the latest loaded month |
 
-Every page opens with a title bar (`E-Commerce Returns & Refund Analytics | <page name>`, a text box). Below it every page uses the same rows (filters, then six cards), so a reader can move between pages without relearning the layout.
+Every page opens with a title bar (`E-Commerce Returns & Refund Analytics | <page name>`, a text box). Below it every page uses the same rows (filters, then one card visual with six KPIs), so a reader can move between pages without relearning the layout.
 
 ## 2. Shared filters
 
