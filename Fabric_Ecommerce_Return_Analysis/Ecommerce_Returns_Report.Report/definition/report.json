@@ -81,5 +81,6 @@
     "allowInlineExploration": true,
     "useEnhancedTooltips": true,
     "useDefaultAggregateDisplayName": true
-  }
+  },
+  "linguisticSchemaSyncVersion": 0
 }
